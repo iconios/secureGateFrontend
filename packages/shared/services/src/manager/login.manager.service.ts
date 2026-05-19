@@ -14,14 +14,17 @@ import { ServerResponse } from "./manager.types";
 3. Get the server response and send to the client
 */
 
-export const LoginManagerService = async ({
-  email,
-  password,
-}: {
-  email: string;
-  password: string;
-}) => {
-  const API_BASE_URL = process.env.API_BASE_URL;
+export const LoginManagerService = async (
+  {
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  },
+  config: { baseUrl: string },
+) => {
+  const API_BASE_URL = config.baseUrl;
   if (!API_BASE_URL) {
     throw new Error("API_BASE_URL is not defined in environment variables");
   }

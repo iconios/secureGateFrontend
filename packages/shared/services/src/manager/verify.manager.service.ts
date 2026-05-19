@@ -6,11 +6,7 @@
  * - Verify Manager: Submits verification code to the API and handles the verification response.
  */
 
-import { ZodError } from "zod";
 import { ServerResponse } from "./manager.types";
-import * as dotenv from "dotenv";
-
-dotenv.config();
 
 /*
 #Plan:
@@ -19,14 +15,17 @@ dotenv.config();
 3. Get the server response and send to the client
 */
 
-export const VerifyManagerService = async ({
-  email,
-  code,
-}: {
-  email: string;
-  code: string;
-}) => {
-  const API_BASE_URL = process.env.API_BASE_URL;
+export const VerifyManagerService = async (
+  {
+    email,
+    code,
+  }: {
+    email: string;
+    code: string;
+  },
+  config: { baseUrl: string },
+) => {
+  const API_BASE_URL = config.baseUrl;
   if (!API_BASE_URL) {
     throw new Error("API_BASE_URL is not defined in environment variables");
   }
@@ -59,10 +58,6 @@ export const VerifyManagerService = async ({
     return result;
   } catch (error) {
     console.error("Error verifying manager", error);
-
-    if (error instanceof ZodError) {
-      throw new Error("Error validating verification code");
-    }
 
     if (error instanceof Error) throw error;
 

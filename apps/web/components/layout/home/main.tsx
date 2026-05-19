@@ -19,18 +19,22 @@ import {
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import InfoIcon from "@mui/icons-material/Info";
 import { Controller, useForm } from "react-hook-form";
-import { CreateManagerData, CreateManagerSchema } from "./types";
+import {
+  CreateManagerData,
+  CreateManagerPayload,
+  CreateManagerSchema,
+} from "./types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { CreateManagerService } from "@shared/services/manager";
+import { showToast } from "../../../utils/toast";
+import {useRouter} from "next/navigation";
 
 export default function RegistrationForm() {
+  const router = useRouter();
+
   // Initialize react-hook-form
-  const {
-    handleSubmit,
-    formState: { errors },
-    control,
-  } = useForm<CreateManagerData>({
+  const { handleSubmit, control, getValues } = useForm<CreateManagerData>({
     resolver: zodResolver(CreateManagerSchema),
     defaultValues: {
       full_name: "",
@@ -43,10 +47,29 @@ export default function RegistrationForm() {
     mode: "onBlur",
   });
 
-  // React query mutation for form submission would go here (e.g. useMutation from react-query or similar)
+  // React query mutation for form submission
   const mutation = useMutation({
-    mutationFn: async (data: CreateManagerData) => {
-      await CreateManagerService(data); // Replace with actual service call
+    mutationFn: async (data: CreateManagerPayload) => {
+      if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
+        throw new Error("Missing NEXT_PUBLIC_API_BASE_URL");
+      }
+
+      return CreateManagerService(data, {
+        baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+      });
+    },
+    onError: (error) => {
+      console.error("Error creating manager account:", error);
+      showToast.error(
+        error.message ?? "Failed to create manager account. Please try again.",
+      );
+    },
+    onSuccess: () => {
+      console.log("Manager account created successfully");
+      showToast.success(
+        "Manager account created successfully! Please check your email for verification.",
+      );
+      router.push(`/verification?email=${encodeURIComponent(getValues("email"))}`);
     },
   });
 
@@ -54,28 +77,19 @@ export default function RegistrationForm() {
   const onSubmit = async (data: CreateManagerData) => {
     try {
       // Call the backend API to create the manager account
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // For demonstration, we'll just log the data
-      console.log("Manager account created:", data);
-
-      // In a real app, you would handle successful account creation here
-    } catch (error: any) {
-      // Simulate backend validation error response
-      const backendErrors = {
-        email: "This email is already registered",
-        phone: "This phone number is already in use",
+      const payload: CreateManagerPayload = {
+        email: data.email,
+        full_name: data.full_name,
+        phone: data.phone,
+        password: data.password,
       };
-
-      // Set errors for the respective fields based on backend response
-      Object.entries(backendErrors).forEach(([field, message]) => {
-        if (field in errors) {
-          errors[field as keyof CreateManagerData] = {
-            type: "server",
-            message,
-          };
-        }
-      });
+      mutation.mutate(payload);
+    } catch (error: any) {
+      // Handle any unexpected errors
+      console.error("Unexpected error:", error);
+      showToast.error(
+        error.message ?? "An unexpected error occurred. Please try again.",
+      );
     }
   };
 
@@ -262,21 +276,23 @@ export default function RegistrationForm() {
                   variant="outlined"
                   error={!!fieldState.error}
                   helperText={
-                    <Typography
-                      component="span"
-                      variant="caption"
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                        mt: 0.5,
-                      }}
-                    >
-                      <InfoIcon sx={{ fontSize: 14 }} />
-                      <span>
-                        Use at least 8 characters with a mix of symbols.
-                      </span>
-                    </Typography>
+                    fieldState.error?.message ?? (
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          mt: 0.5,
+                        }}
+                      >
+                        <InfoIcon sx={{ fontSize: 14 }} />
+                        <span>
+                          Use at least 8 characters with a mix of symbols.
+                        </span>
+                      </Typography>
+                    )
                   }
                 />
               )}
@@ -304,7 +320,6 @@ export default function RegistrationForm() {
             <Controller
               name="terms"
               control={control}
-              rules={{ required: "You must accept the terms and conditions" }}
               render={({ field, fieldState }) => (
                 <Box>
                   <FormControlLabel
@@ -312,6 +327,12 @@ export default function RegistrationForm() {
                       <Checkbox
                         checked={field.value}
                         onChange={(e) => field.onChange(e.target.checked)}
+                        onBlur={field.onBlur}
+                        slotProps={{
+                          root: {
+                            ref: field.ref,
+                          },
+                        }}
                         sx={{
                           "&.Mui-checked": {
                             color: "primary.main",
@@ -365,6 +386,7 @@ export default function RegistrationForm() {
               variant="contained"
               fullWidth
               size="large"
+              disabled={mutation.isPending}
               endIcon={<ArrowForwardIcon />}
               sx={{
                 py: 1.5,
@@ -380,7 +402,9 @@ export default function RegistrationForm() {
                 },
               }}
             >
-              Create manager account
+              {mutation.isPending
+                ? "Creating Account..."
+                : "Create manager account"}
             </Button>
           </Box>
 
@@ -390,7 +414,7 @@ export default function RegistrationForm() {
             <Typography variant="body1" color="text.secondary">
               Already have an account?{" "}
               <Link
-                href="#"
+                href="/login"
                 sx={{
                   color: "primary.main",
                   fontWeight: "extrabold",

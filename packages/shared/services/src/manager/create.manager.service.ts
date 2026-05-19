@@ -6,11 +6,7 @@
  * - Create Manager: Submits new manager details to the API and handles the creation response.
  */
 
-import { ZodError } from "zod";
 import { ServerResponse } from "./manager.types";
-import * as dotenv from "dotenv";
-
-dotenv.config();
 
 /*
 #Plan:
@@ -19,13 +15,16 @@ dotenv.config();
 3. Get the server response and send to the client
 */
 
-export const CreateManagerService = async (createManagerData: {
-  email: string;
-  full_name: string;
-  phone: string;
-  password: string;
-}) => {
-  const API_BASE_URL = process.env.API_BASE_URL;
+export const CreateManagerService = async (
+  createManagerData: {
+    email: string;
+    full_name: string;
+    phone: string;
+    password: string;
+  },
+  config: { baseUrl: string },
+) => {
+  const API_BASE_URL = config.baseUrl;
   if (!API_BASE_URL) {
     throw new Error("API_BASE_URL is not defined in environment variables");
   }
@@ -59,10 +58,6 @@ export const CreateManagerService = async (createManagerData: {
     return result;
   } catch (error) {
     console.error("Error creating manager", error);
-
-    if (error instanceof ZodError) {
-      throw new Error("Error validating manager data");
-    }
 
     if (error instanceof Error) throw error;
 
