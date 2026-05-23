@@ -29,6 +29,7 @@ import { useMutation } from "@tanstack/react-query";
 import { CreateManagerService } from "@shared/services/manager";
 import { showToast } from "../../../utils/toast";
 import {useRouter} from "next/navigation";
+import NextLink from "next/link";
 
 export default function RegistrationForm() {
   const router = useRouter();
@@ -414,6 +415,7 @@ export default function RegistrationForm() {
             <Typography variant="body1" color="text.secondary">
               Already have an account?{" "}
               <Link
+                component={NextLink}
                 href="/login"
                 sx={{
                   color: "primary.main",
