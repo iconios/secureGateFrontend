@@ -1,5 +1,5 @@
 const RightColumnDefault = () => {
-    return null;
+  return null;
 };
 
 export default RightColumnDefault;

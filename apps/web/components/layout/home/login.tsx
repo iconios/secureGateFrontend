@@ -34,8 +34,10 @@ import NextLink from "next/link";
 import MuiLink from "@mui/material/Link";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import VerifiedUser from "@mui/icons-material/VerifiedUser";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
+  const router = useRouter();
   // For the stepper component
   const steps = ["Account", "Verify", "Log in"];
   const activeStep = 2;
@@ -82,6 +84,9 @@ export default function LoginForm() {
       showToast.success(
         "Code verified successfully! Redirecting to dashboard...",
       );
+      setInterval(() => {
+        router.replace("/dashboard");
+      }, 3000);
     },
   });
 
@@ -248,7 +253,7 @@ export default function LoginForm() {
                     Password
                   </Typography>
                   <MuiLink
-                    href="#"
+                    href="/forgot-password"
                     component={NextLink}
                     passHref
                     style={{ color: "primary.light", textDecoration: "none" }}

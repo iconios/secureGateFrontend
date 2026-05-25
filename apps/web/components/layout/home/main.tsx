@@ -28,7 +28,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { CreateManagerService } from "@shared/services/manager";
 import { showToast } from "../../../utils/toast";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import NextLink from "next/link";
 
 export default function RegistrationForm() {
@@ -70,7 +70,9 @@ export default function RegistrationForm() {
       showToast.success(
         "Manager account created successfully! Please check your email for verification.",
       );
-      router.push(`/verification?email=${encodeURIComponent(getValues("email"))}`);
+      router.push(
+        `/verification?email=${encodeURIComponent(getValues("email"))}`,
+      );
     },
   });
 

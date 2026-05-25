@@ -21,7 +21,7 @@ import { showToast } from "../../../utils/toast";
 import { useRouter } from "next/navigation";
 
 export default function VerificationForm({
-  email
+  email,
 }: Readonly<{
   email: string;
 }>) {
@@ -109,9 +109,7 @@ export default function VerificationForm({
     onSuccess: (response) => {
       // Handle successful verification (e.g., redirect to dashboard)
       console.log("Code verified successfully:", response);
-      showToast.success(
-        "Code verified successfully! Please log in.",
-      );
+      showToast.success("Code verified successfully! Please log in.");
       router.push("/login");
     },
   });
