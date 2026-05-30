@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   ApartmentOutlined,
   NotificationsOutlined,
@@ -12,6 +15,8 @@ import {
 } from "@mui/material";
 
 const MainTopBar = () => {
+  const [selectedEstateId, setSelectedEstateId] = useState("");
+
   const estates = [
     {
       name: "Oakwood Residency",
@@ -24,57 +29,103 @@ const MainTopBar = () => {
       id: "165432",
     },
   ];
+
   return (
     <Box
       component="form"
       sx={{
-        "& .MuiTextField-root": {
-          m: 1,
-          width: "100%",
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          justifyContent: { xs: "flex-start", md: "space-between" },
-        },
+        width: "100%",
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        alignItems: { xs: "stretch", md: "center" },
+        justifyContent: "space-between",
+        gap: { xs: 1.5, md: 2 },
+        px: { xs: 1.5, md: 2 },
+        py: { xs: 1.5, md: 1 },
       }}
       autoComplete="off"
     >
       <TextField
-        id="outlined-basic"
+        id="main-search"
         variant="outlined"
         placeholder="Search residents, vehicles or logs..."
+        size="small"
         slotProps={{
           input: {
             startAdornment: (
               <InputAdornment position="start">
-                <Search />
+                <Search fontSize="small" />
               </InputAdornment>
             ),
           },
         }}
         sx={{
+          width: { xs: "100%", md: "auto" },
           flexGrow: 1,
+          minWidth: { md: 320 },
         }}
       />
-      <Box>
-        <IconButton size="medium">
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          width: { xs: "100%", md: "auto" },
+        }}
+      >
+        <IconButton
+          aria-label="notifications"
+          size="medium"
+          sx={{
+            flexShrink: 0,
+            border: 1,
+            borderColor: "divider",
+          }}
+        >
           <NotificationsOutlined color="primary" fontSize="medium" />
         </IconButton>
+
         <TextField
-          id="outlined-select-estate"
+          id="estate-selector"
           select
-          defaultValue="Estate Selector"
+          value={selectedEstateId}
+          onChange={(event) => setSelectedEstateId(event.target.value)}
+          size="small"
           slotProps={{
+            select: {
+              displayEmpty: true,
+              renderValue: (selected) => {
+                if (!selected) {
+                  return "Estate Selector";
+                }
+
+                const selectedEstate = estates.find(
+                  (estate) => estate.id === selected,
+                );
+                return selectedEstate?.name ?? "Estate Selector";
+              },
+            },
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <ApartmentOutlined fontSize="medium" />
+                  <ApartmentOutlined fontSize="small" />
                 </InputAdornment>
               ),
             },
           }}
+          sx={{
+            flexGrow: { xs: 1, md: 0 },
+            width: { xs: "100%", md: 280 },
+            minWidth: 0,
+          }}
         >
+          <MenuItem value="" disabled>
+            Estate Selector
+          </MenuItem>
+
           {estates.map((estate) => (
-            <MenuItem key={estate.id} value={estate.name}>
+            <MenuItem key={estate.id} value={estate.id}>
               {estate.name}
             </MenuItem>
           ))}

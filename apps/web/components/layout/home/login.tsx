@@ -35,9 +35,11 @@ import MuiLink from "@mui/material/Link";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import VerifiedUser from "@mui/icons-material/VerifiedUser";
 import { useRouter } from "next/navigation";
+import { webStorage } from "../../../lib/server-storage";
 
 export default function LoginForm() {
   const router = useRouter();
+
   // For the stepper component
   const steps = ["Account", "Verify", "Log in"];
   const activeStep = 2;
@@ -64,7 +66,7 @@ export default function LoginForm() {
       if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
         throw new Error("Missing NEXT_PUBLIC_API_BASE_URL");
       }
-      return LoginManagerService(data, {
+      return LoginManagerService({ storage: webStorage }, data, {
         baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
       });
     },
@@ -84,6 +86,7 @@ export default function LoginForm() {
       showToast.success(
         "Code verified successfully! Redirecting to dashboard...",
       );
+
       setInterval(() => {
         router.replace("/dashboard");
       }, 3000);

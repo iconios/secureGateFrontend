@@ -1,12 +1,14 @@
-import Header from "../../components/layout/home/header";
+import React from "react";
+import DashboardLayoutClient from "./DashboardLayoutClient";
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <>
-      <Header />
-      {children}
-    </>
-  );
+const DashboardLayout = ({
+  Aside,
+  RightColumn,
+}: {
+  Aside: React.ReactNode;
+  RightColumn: React.ReactNode;
+}) => {
+  return <DashboardLayoutClient Aside={Aside} RightColumn={RightColumn} />;
 };
 
 export default DashboardLayout;

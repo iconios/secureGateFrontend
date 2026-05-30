@@ -10,7 +10,6 @@ import {
   DriveEtaOutlined,
   HailOutlined,
   ManageAccounts,
-  Menu,
   Payment,
   Person2Outlined,
   ReportProblem,
@@ -18,9 +17,8 @@ import {
   ShieldOutlined,
 } from "@mui/icons-material";
 import {
-  AppBar,
   Box,
-  Divider,
+  Button,
   Drawer,
   IconButton,
   Link,
@@ -29,21 +27,19 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Toolbar,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useNavigation } from "../../../providers/NavigationContext";
-import Header from "../home/header";
 
 const SidebarDrawer = () => {
-  const drawerWidth = 280;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const pathname = usePathname();
   const { mobileOpen, setMobileOpen } = useNavigation();
+  const drawerWidth = isMobile ? "min(82vw, 320px)" : 280;
 
   const navItems = [
     {
@@ -61,7 +57,7 @@ const SidebarDrawer = () => {
       icon: <Person2Outlined />,
       path: "/dashboard/residents",
     },
-    { text: "Guests", icon: <HailOutlined />, path: "dashboard/guests" },
+    { text: "Guests", icon: <HailOutlined />, path: "/dashboard/guests" },
     {
       text: "Vehicles",
       icon: <DriveEtaOutlined />,
@@ -112,163 +108,221 @@ const SidebarDrawer = () => {
     },
   ];
 
-  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
   const handleNavigation = () => isMobile && setMobileOpen(false);
 
   const drawerContent = (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Box
+      sx={{
+        height: "100%",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {isMobile && (
-        <AppBar position="sticky" color="default" elevation={1}>
-          <Toolbar>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              Menu
-            </Typography>
-            <IconButton onClick={handleDrawerToggle}>
-              <Close />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: 2,
+            py: 1.5,
+            borderBottom: 1,
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            flexShrink: 0,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 500,
+              color: "primary.main",
+            }}
+          >
+            Estate Management
+          </Typography>
+
+          <IconButton
+            aria-label="close menu"
+            onClick={() => setMobileOpen(false)}
+          >
+            <Close sx={{ color: "primary.main" }} />
+          </IconButton>
+        </Box>
+      )}
+
+      {!isMobile && (
+        <Box
+          sx={{
+            p: 3,
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 400,
+              color: "primary.main",
+            }}
+          >
+            Estate Management
+          </Typography>
+        </Box>
       )}
 
       <Box
         sx={{
-          p: 3,
-          borderBottom: 1,
-          borderColor: "divider",
-          display: "flex",
-          flexDirection: "column",
+          flexGrow: 1,
+          overflowY: "auto",
+          py: 1,
         }}
       >
+        <List>
+          {navItems.map((item) => {
+            const isActive = pathname === item.path;
+            return (
+              <ListItem key={item.text} disablePadding>
+                <ListItemButton
+                  component={Link}
+                  href={item.path}
+                  onClick={handleNavigation}
+                  selected={isActive}
+                  sx={{
+                    mx: 1,
+                    borderRadius: 2,
+                    "&.Mui-selected": {
+                      bgcolor: theme.palette.primary.main + "15",
+                      color: "primary.main",
+                      "& .MuiListItemIcon-root": {
+                        color: theme.palette.primary.main,
+                      },
+                      "&:hover": {
+                        bgcolor: "#E5E4E2",
+                      },
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+
         <Typography
-          variant="h5"
-          sx={{ fontWeight: "bold", color: "primary.main" }}
+          sx={{
+            fontSize: 10,
+            fontWeight: 800,
+            letterSpacing: 1.4,
+            textTransform: "uppercase",
+            px: 2,
+            pt: 2,
+            pb: 1,
+          }}
         >
-          SecureGate
+          Administration
         </Typography>
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: "regular", color: "primary.main" }}
-        >
-          ESTATE MANAGEMENT
-        </Typography>
+
+        <List>
+          {adminItems.map((item) => {
+            const isActive = pathname === item.path;
+            return (
+              <ListItem key={item.text} disablePadding>
+                <ListItemButton
+                  component={Link}
+                  href={item.path}
+                  onClick={handleNavigation}
+                  selected={isActive}
+                  sx={{
+                    mx: 1,
+                    borderRadius: 2,
+                    "&.Mui-selected": {
+                      bgcolor: theme.palette.primary.main + "15",
+                      "& .MuiListItemIcon-root": {
+                        color: theme.palette.primary.main,
+                      },
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
       </Box>
 
-      <List sx={{ flex: 1 }}>
-        {navItems.map((item) => {
-          const isActive = pathname === item.path;
-          return (
-            <ListItem key={item.text} disablePadding>
-              <ListItemButton
-                component={Link}
-                href={item.path}
-                onClick={handleNavigation}
-                selected={isActive}
-                sx={{
-                  mx: 1,
-                  borderRadius: 2,
-                  "&.Mui-selected": {
-                    bgcolor: theme.palette.primary.main + "15",
-                    "& .MuiListItemIcon-root": {
-                      color: theme.palette.primary.main,
-                    },
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
-      </List>
-
-      <Typography
+      <Box
         sx={{
-          fontSize: 10,
-          fontWeight: 800,
-          letterSpacing: 1.4,
-          textTransform: "uppercase",
           px: 2,
           pt: 2,
-          pb: 1,
+          pb: { xs: 4, md: 3 },
+          borderTop: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
         }}
       >
-        Administration
-      </Typography>
-
-      <List sx={{ flex: 1 }}>
-        {adminItems.map((item) => {
-          const isActive = pathname === item.path;
-          return (
-            <ListItem key={item.text} disablePadding>
-              <ListItemButton
-                component={Link}
-                href={item.path}
-                onClick={handleNavigation}
-                selected={isActive}
-                sx={{
-                  mx: 1,
-                  borderRadius: 2,
-                  "&.Mui-selected": {
-                    bgcolor: theme.palette.primary.main + "15",
-                    "& .MuiListItemIcon-root": {
-                      color: theme.palette.primary.main,
-                    },
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
-      </List>
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{
+            py: 1.1,
+            borderRadius: 2,
+            fontWeight: 600,
+          }}
+        >
+          Log out
+        </Button>
+      </Box>
     </Box>
   );
 
   return (
-    <>
+    <Box>
       {/* Mobile Drawer */}
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-        sx={{
-          display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": { width: drawerWidth },
-        }}
-      >
-        {drawerContent}
-      </Drawer>
-
-      {/* Desktop sidebar */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: "none", md: "block" },
-          "& .MuiDrawer-paper": { width: drawerWidth, position: "relative" },
-        }}
-        open
-      >
-        {drawerContent}
-      </Drawer>
-
-      {/* Mobile app bar */}
-      {isMobile && (
-        <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1 }}>
-          <Toolbar>
-            <IconButton onClick={handleDrawerToggle}>
-              <Menu />
-            </IconButton>
-            <Typography>
-              {navItems.find((item) => item.path === pathname)?.text ||
-                adminItems.find((item) => item.path === pathname)?.text}
-            </Typography>
-          </Toolbar>
-        </AppBar>
+      {isMobile ? (
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            display: { xs: "block", md: "none" },
+            zIndex: theme.zIndex.drawer + 2,
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              zIndex: theme.zIndex.drawer + 2,
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+      ) : (
+        <Drawer
+          variant="permanent"
+          open
+          sx={{
+            display: { xs: "none", md: "block" },
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              position: "relative",
+              flexShrink: 0,
+              boxSizing: "border-box",
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
       )}
-    </>
+    </Box>
   );
 };
 

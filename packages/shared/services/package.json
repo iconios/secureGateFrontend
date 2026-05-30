@@ -6,6 +6,10 @@
         "./manager": {
             "types": "./src/*/index.ts",
             "default": "./src/*/index.ts"
+        },
+        "./estate": {
+            "types": "./src/*/index.ts",
+            "default": "./src/*/index.ts"
         }
     },
     "scripts": {

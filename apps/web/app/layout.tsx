@@ -1,102 +1,12 @@
-import { BrowserAgent } from "@newrelic/browser-agent/loaders/browser-agent";
 import { Metadata } from "next";
 import ReactQueryProvider from "../providers/ReactQueryProvider";
 import ThemeProvider from "../providers/ThemeProvider";
 import { ToastContainer } from "react-toastify";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
-
-// New Relic Types
-interface NewRelicInfo {
-  applicationID: string;
-  beacon: string;
-  errorBeacon: string;
-  licenseKey: string;
-  sa: number;
-}
-
-interface NewRelicAjaxConfig {
-  deny_list: string[];
-}
-
-interface NewRelicBrowserConsentMode {
-  enabled: boolean;
-}
-
-interface NewRelicDistributedTracing {
-  enabled: boolean;
-}
-
-interface NewRelicPerformance {
-  capture_detail: boolean;
-  capture_marks: boolean;
-  capture_measures: boolean;
-}
-
-interface NewRelicPrivacy {
-  cookies_enabled: boolean;
-}
-
-interface NewRelicInit {
-  ajax: NewRelicAjaxConfig;
-  browser_consent_mode: NewRelicBrowserConsentMode;
-  distributed_tracing: NewRelicDistributedTracing;
-  performance: NewRelicPerformance;
-  privacy: NewRelicPrivacy;
-}
-
-interface NewRelicLoaderConfig {
-  accountID: number;
-  agentID: number;
-  applicationID: string;
-  licenseKey: string;
-  trustKey: number;
-}
-
-interface NewRelicOptions {
-  info: NewRelicInfo;
-  init: NewRelicInit;
-  loader_config: NewRelicLoaderConfig;
-}
-
-// New Relic Options
-const options: NewRelicOptions = {
-  info: {
-    applicationID: "601646833", // Changed to string
-    beacon: "bam.nr-data.net",
-    errorBeacon: "bam.nr-data.net",
-    licenseKey: "NRJS-fa2f4192a311f89e621",
-    sa: 1,
-  },
-  init: {
-    ajax: {
-      deny_list: ["bam.nr-data.net"],
-    },
-    browser_consent_mode: {
-      enabled: false,
-    },
-    distributed_tracing: {
-      enabled: true,
-    },
-    performance: {
-      capture_detail: false,
-      capture_marks: false,
-      capture_measures: true,
-    },
-    privacy: {
-      cookies_enabled: true,
-    },
-  },
-  loader_config: {
-    accountID: 8059438,
-    agentID: 601646833,
-    applicationID: "601646833", // Changed to string
-    licenseKey: "NRJS-fa2f4192a311f89e621",
-    trustKey: 8059438,
-  },
-};
-
-// The agent loader code executes immediately on instantiation.
-const nrba = new BrowserAgent(options);
+import Script from "next/script";
+import { getNewRelicBrowserScript } from "../lib/newrelic-browser";
+import { Provider } from "react-redux";
+import store from "../lib/store";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -108,17 +18,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const newrelicBrowserScript = getNewRelicBrowserScript();
   return (
     <html lang="en">
       <body>
-        <AppRouterCacheProvider>
-          <ReactQueryProvider>
-            <ThemeProvider>
-              {children}
-              <ToastContainer />
-            </ThemeProvider>
-          </ReactQueryProvider>
-        </AppRouterCacheProvider>
+        {newrelicBrowserScript && (
+          <Script
+            id="newrelic-browser"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{ __html: newrelicBrowserScript }}
+          />
+        )}
+        <Provider store={store}>
+          <AppRouterCacheProvider>
+            <ReactQueryProvider>
+              <ThemeProvider>
+                {children}
+                <ToastContainer />
+              </ThemeProvider>
+            </ReactQueryProvider>
+          </AppRouterCacheProvider>
+        </Provider>
       </body>
     </html>
   );

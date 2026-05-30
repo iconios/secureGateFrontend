@@ -2,7 +2,12 @@
 
 import React, { createContext, useContext, useMemo, useState } from "react";
 
-const NavigationContext = createContext<any>(null);
+type NavigationContextValue = {
+  mobileOpen: boolean;
+  setMobileOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const NavigationContext = createContext<NavigationContextValue | null>(null);
 
 const NavigationProvider = ({ children }: { children: React.ReactNode }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -22,8 +27,14 @@ const NavigationProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const useNavigation = () => {
-  return useContext(NavigationContext);
+const useNavigation = (): NavigationContextValue => {
+  const context = useContext(NavigationContext);
+
+  if (!context) {
+    throw new Error("useNavigation must be used inside NavigationProvider");
+  }
+
+  return context;
 };
 
 export { NavigationProvider, useNavigation };
