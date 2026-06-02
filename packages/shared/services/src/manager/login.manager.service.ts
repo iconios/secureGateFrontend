@@ -5,7 +5,7 @@
  * It provides methods to submit authentication credentials and manage the authentication state.
  */
 
-import { ServerResponse } from "./manager.types";
+import { ActionContext, ServerLoginResponse } from "./manager.types";
 
 /*
 #Plan:
@@ -15,6 +15,7 @@ import { ServerResponse } from "./manager.types";
 */
 
 export const LoginManagerService = async (
+  context: ActionContext,
   {
     email,
     password,
@@ -48,12 +49,18 @@ export const LoginManagerService = async (
     });
 
     // 3. Get the server response and send to the client
-    const result: ServerResponse = await response.json();
+    const result: ServerLoginResponse = await response.json();
     if (!response.ok || !result.success) {
       throw new Error(result.error?.details || "Failed to login manager");
     }
 
-    return result;
+    if (!("token" in result.data)) {
+      throw new Error("Login response did not include necessary auth data");
+    }
+
+    const { token, ...otherUserData } = result.data;
+    await context.storage.set("auth_token", token);
+    return otherUserData;
   } catch (error) {
     console.error("Error logging in manager", error);
 

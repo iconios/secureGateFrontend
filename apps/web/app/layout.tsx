@@ -5,8 +5,7 @@ import { ToastContainer } from "react-toastify";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import Script from "next/script";
 import { getNewRelicBrowserScript } from "../lib/newrelic-browser";
-import { Provider } from "react-redux";
-import store from "../lib/store";
+import ReduxProvider from "../providers/ReduxProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -29,7 +28,7 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{ __html: newrelicBrowserScript }}
           />
         )}
-        <Provider store={store}>
+        <ReduxProvider>
           <AppRouterCacheProvider>
             <ReactQueryProvider>
               <ThemeProvider>
@@ -38,7 +37,7 @@ export default function RootLayout({
               </ThemeProvider>
             </ReactQueryProvider>
           </AppRouterCacheProvider>
-        </Provider>
+        </ReduxProvider>
       </body>
     </html>
   );
