@@ -51,6 +51,7 @@ export interface CreateManagerPayload {
 export const LoginManagerSchema = z.object({
   email: z.email("Valid email address is required"),
   password: PasswordSchema,
+  rememberMe: z.boolean(),
 });
 
 export type LoginManagerData = z.infer<typeof LoginManagerSchema>;

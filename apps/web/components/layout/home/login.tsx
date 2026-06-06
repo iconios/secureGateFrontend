@@ -29,16 +29,18 @@ import {
   Shield,
 } from "@mui/icons-material";
 import { LoginManagerData, LoginManagerSchema } from "./types";
-import { LoginManagerService } from "@shared/services/manager";
 import NextLink from "next/link";
 import MuiLink from "@mui/material/Link";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import VerifiedUser from "@mui/icons-material/VerifiedUser";
 import { useRouter } from "next/navigation";
-import { webStorage } from "../../../lib/server-storage";
+import { useDispatch } from "react-redux";
+import { authActions } from "../../../lib/features/auth/authSlice";
 
 export default function LoginForm() {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const [rememberMe, setRememberMe] = useState(false);
 
   // For the stepper component
   const steps = ["Account", "Verify", "Log in"];
@@ -55,39 +57,56 @@ export default function LoginForm() {
     defaultValues: {
       email: "",
       password: "",
+      rememberMe: rememberMe,
     },
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
-  // React query mutation for verifying code
+  // React query mutation for verifying credentials
   const mutation = useMutation({
-    mutationFn: (data: { email: string; password: string }) => {
-      if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
-        throw new Error("Missing NEXT_PUBLIC_API_BASE_URL");
-      }
-      return LoginManagerService({ storage: webStorage }, data, {
-        baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+    mutationFn: async (data: LoginManagerData) => {
+      dispatch(authActions.loginStart());
+
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...data,
+          rememberMe,
+        }),
       });
-    },
-    onError: (error) => {
-      console.error("Error verifying code:", error);
-      if (error instanceof Error) {
-        showToast.error(
-          error.message ?? "Failed to verify code. Please try again.",
-        );
-      } else {
-        showToast.error("Invalid code. Please try again.");
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Failed to verify credentials");
       }
+
+      return result.data;
     },
-    onSuccess: (response) => {
-      // Handle successful verification (e.g., redirect to dashboard)
-      console.log("Code verified successfully:", response);
+
+    onError: (error) => {
+      console.error("Error verifying credentials:", error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Invalid credentials. Please try again.";
+
+      dispatch(authActions.loginFailure({ error: { message: errorMessage } }));
+      showToast.error(errorMessage);
+    },
+
+    onSuccess: (userData) => {
+      dispatch(authActions.loginSuccess(userData));
+
       showToast.success(
-        "Code verified successfully! Redirecting to dashboard...",
+        "Credentials verified successfully! Redirecting to dashboard...",
       );
 
-      setInterval(() => {
+      setTimeout(() => {
         router.replace("/dashboard");
       }, 3000);
     },

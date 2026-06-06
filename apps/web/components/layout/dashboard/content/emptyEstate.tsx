@@ -1,3 +1,5 @@
+"use client";
+
 import { BookOnline, HouseOutlined } from "@mui/icons-material";
 import {
   Box,
@@ -14,8 +16,12 @@ import {
 } from "@mui/material";
 import Image from "next/image";
 import { useState } from "react";
+import useAuthCheck from "../../../../hooks/useAuthCheck";
 
-const NoEstateYet = () => {
+const NoEstateYet = ({ nextStepHandler }: { nextStepHandler: () => void }) => {
+  // Check user auth status
+  useAuthCheck();
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeStep, setActiveStep] = useState(0);
@@ -104,7 +110,9 @@ const NoEstateYet = () => {
           <Button
             variant="contained"
             size="medium"
-            onClick={() => {}}
+            onClick={() => {
+              nextStepHandler();
+            }}
             startIcon={<HouseOutlined />}
             sx={{ px: 3, py: 1 }}
           >

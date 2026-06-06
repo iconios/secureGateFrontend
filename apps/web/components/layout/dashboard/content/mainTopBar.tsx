@@ -14,21 +14,12 @@ import {
   TextField,
 } from "@mui/material";
 
-const MainTopBar = () => {
+const MainTopBar = ({
+  estates,
+}: {
+  estates: { id: string; name: string }[];
+}) => {
   const [selectedEstateId, setSelectedEstateId] = useState("");
-
-  const estates = [
-    {
-      name: "Oakwood Residency",
-      status: "active",
-      id: "123456",
-    },
-    {
-      name: "Morenike Residential Estate",
-      status: "active",
-      id: "165432",
-    },
-  ];
 
   return (
     <Box

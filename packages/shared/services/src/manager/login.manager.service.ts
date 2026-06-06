@@ -19,9 +19,11 @@ export const LoginManagerService = async (
   {
     email,
     password,
+    rememberMe,
   }: {
     email: string;
     password: string;
+    rememberMe: boolean;
   },
   config: { baseUrl: string },
 ) => {
@@ -59,7 +61,7 @@ export const LoginManagerService = async (
     }
 
     const { token, ...otherUserData } = result.data;
-    await context.storage.set("auth_token", token);
+    await context.storage.set("auth_token", token, rememberMe);
     return otherUserData;
   } catch (error) {
     console.error("Error logging in manager", error);

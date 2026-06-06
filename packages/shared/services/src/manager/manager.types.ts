@@ -3,7 +3,11 @@ export interface ServerLoginResponse {
   message: string;
   data:
     | {
-        user: object;
+        user: {
+          id: string;
+          full_name: string;
+          email: string;
+        };
         token: string;
         role: string;
       }
@@ -41,12 +45,58 @@ export interface ServerSubscriptionPlansResponse {
   };
 }
 
+export interface ServerManagerDashboardResponse {
+  success: boolean;
+  message: string;
+  data:
+    | {
+        id: string;
+        estate_id: string;
+        estate_name: string;
+        estate_location: string;
+        estate_state: string;
+        estate_status: string;
+        estate_logo_url: string;
+        estate_number_of_households: number;
+        estate_plan_id: string;
+        estate_subscription_plan_name: string | null;
+        estate_subscription_plan_household_limit: number;
+        estate_payment_id: string | null;
+        estate_payment_expires_at: string | null;
+        estate_payment_paid_at: string | null;
+        estate_payment_status: "pending" | "paid" | "failed" | null;
+      }[]
+    | null;
+  error: {
+    code: string;
+    details: any;
+  } | null;
+  metadata: {
+    timestamp: string;
+  };
+}
+
 export interface ISecureStorage {
   get(key: string): Promise<string | null>;
-  set(key: string, value: string): Promise<void>;
+  set(key: string, value: string, rememberMe: boolean): Promise<void>;
   delete(key: string): Promise<void>;
 }
 
 export interface ActionContext {
   storage: ISecureStorage;
+}
+
+export interface ServerLogoutResponse {
+  success: boolean;
+  message: string;
+  data: {};
+  error:
+    | {
+        name: string;
+        message: string;
+      }
+    | {};
+  metadata: {
+    timestamp: string;
+  };
 }

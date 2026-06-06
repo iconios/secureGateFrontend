@@ -33,13 +33,26 @@ import {
 import { useSubscriptionPlans } from "../../../../hooks/useSubscriptionPlans";
 import { showToast } from "../../../../utils/toast";
 import { ChangeEvent, MouseEvent, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { estateActions } from "../../../../lib/features/estate/estateSlice";
+import { RootState } from "../../../../lib/store";
 
-const HouseholdLimitSelection = () => {
+const HouseholdLimitSelection = ({
+  nextStepHandler,
+  prevStepHandler,
+}: {
+  nextStepHandler: () => void;
+  prevStepHandler: () => void;
+}) => {
+  const dispatch = useDispatch();
+  const storedEstate = useSelector((state: RootState) => state.estate);
+  const { upsertHousehold } = estateActions;
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
   const [subscriptionPeriod, setSubscriptionPeriod] = useState<string | null>(
     "monthly",
   );
   const { isError, error, data, isPending, refetch } = useSubscriptionPlans();
+  const { plan, period, households, amount } = storedEstate;
 
   if (isPending) {
     return (
@@ -86,18 +99,39 @@ const HouseholdLimitSelection = () => {
     );
   }
 
+  const plans = data.data?.plansData;
+
   const handleSubscriptionPlan = (
     event: MouseEvent<HTMLElement>,
     period: string | null,
   ) => {
+    if (!period) return;
+    const plan = plans?.find((item) => item.id === selectedPlanId);
     setSubscriptionPeriod(period);
+    dispatch(
+      upsertHousehold({
+        period: period,
+        amount: period === "monthly" ? plan?.monthly_fee : plan?.yearly_fee,
+      }),
+    );
   };
 
   const handlePlanChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSelectedPlanId(event.target.value);
+    const nextPlanId = event.target.value;
+    setSelectedPlanId(nextPlanId);
+    const plan = plans?.find((item) => item.id === nextPlanId);
+    dispatch(
+      upsertHousehold({
+        period: subscriptionPeriod,
+        households: plan?.household_limit,
+        amount:
+          subscriptionPeriod === "monthly"
+            ? plan?.monthly_fee
+            : plan?.yearly_fee,
+        plan: plan?.name,
+      }),
+    );
   };
-
-  const plans = data.data?.plansData;
 
   const getPlanIcon = (limit: number) => {
     if (limit <= 50) return <HomeOutlined />;
@@ -156,6 +190,7 @@ const HouseholdLimitSelection = () => {
               sx={{
                 fontSize: { xs: 12, md: 14 },
                 pb: { xs: 2, md: 3 },
+                color: "grey",
               }}
             >
               Choose the maximum number of households this estate can manage.
@@ -403,6 +438,7 @@ const HouseholdLimitSelection = () => {
                 py: 1,
                 border: "1px solid grey",
               }}
+              onClick={() => prevStepHandler()}
             >
               Back
             </Button>
@@ -414,8 +450,9 @@ const HouseholdLimitSelection = () => {
                 py: 1,
                 bgcolor: "primary.main",
               }}
+              onClick={() => nextStepHandler()}
             >
-              Continue
+              Proceed to payment
             </Button>
           </Box>
         </Box>
@@ -425,7 +462,7 @@ const HouseholdLimitSelection = () => {
           sx={{
             display: "flex",
             flexDirection: "column",
-            width: "33%",
+            width: { xs: "100%", md: "33%" },
             pb: { xs: 2, md: 3 },
           }}
         >
@@ -480,11 +517,10 @@ const HouseholdLimitSelection = () => {
               </Typography>
               <Typography
                 sx={{
-                  color: "grey",
                   fontSize: { xs: 12, md: 16 },
                 }}
               >
-                {}
+                {plan}
               </Typography>
             </Box>
             <Box
@@ -505,11 +541,10 @@ const HouseholdLimitSelection = () => {
               </Typography>
               <Typography
                 sx={{
-                  color: "grey",
                   fontSize: { xs: 12, md: 16 },
                 }}
               >
-                {}
+                {households}
               </Typography>
             </Box>
             <Box
@@ -530,11 +565,10 @@ const HouseholdLimitSelection = () => {
               </Typography>
               <Typography
                 sx={{
-                  color: "grey",
                   fontSize: { xs: 12, md: 16 },
                 }}
               >
-                {}
+                {period}
               </Typography>
             </Box>
             <Divider
@@ -558,7 +592,7 @@ const HouseholdLimitSelection = () => {
               >
                 Total Price
               </Typography>
-              <Typography>{}</Typography>
+              <Typography>{amount?.toLocaleString()}</Typography>
             </Box>
             <Box
               sx={{

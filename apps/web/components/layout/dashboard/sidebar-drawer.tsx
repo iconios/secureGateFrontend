@@ -31,15 +31,56 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useNavigation } from "../../../providers/NavigationContext";
+import { useDispatch } from "react-redux";
+import { authActions } from "../../../lib/features/auth/authSlice";
+import useAuthCheck from "../../../hooks/useAuthCheck";
+import { useState } from "react";
+import { showToast } from "../../../utils/toast";
 
 const SidebarDrawer = () => {
+  // Check whether user is authenticated. If no, return login page
+  useAuthCheck();
+  // Local state for auth redux store
+  const { logout } = authActions;
+  const dispatch = useDispatch();
+  // Local state for MUI theme
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const pathname = usePathname();
+  //Local state for navigation
   const { mobileOpen, setMobileOpen } = useNavigation();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const drawerWidth = isMobile ? "min(82vw, 320px)" : 280;
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.error?.name || "Logout failed on server");
+      }
+
+      dispatch(logout());
+      router.replace("/login");
+    } catch (error) {
+      console.log("SidebarDrawer Component error:", error);
+
+      showToast.error("Error logging out. Please try again");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const navItems = [
     {
@@ -271,13 +312,17 @@ const SidebarDrawer = () => {
         <Button
           variant="contained"
           fullWidth
+          onClick={() => {
+            handleLogout();
+          }}
           sx={{
             py: 1.1,
             borderRadius: 2,
             fontWeight: 600,
           }}
+          disabled={loading}
         >
-          Log out
+          {loading ? "Logging out" : "Log out"}
         </Button>
       </Box>
     </Box>

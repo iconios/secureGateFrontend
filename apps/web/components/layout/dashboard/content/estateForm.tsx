@@ -19,7 +19,6 @@ import {
   InsertDriveFileOutlined,
 } from "@mui/icons-material";
 import { useForm, Controller } from "react-hook-form";
-import EstateCreationSteps from "./estateStepper";
 import { useDispatch } from "react-redux";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEstateData, createEstateSchema } from "./estate.types";
@@ -28,7 +27,10 @@ import { useImageUpload } from "../../../../hooks/useImageUpload";
 
 const allNigerianStates = getAllStates();
 
-const EstateForm = () => {
+const EstateForm = ({ nextStepHandler }: { nextStepHandler: () => void }) => {
+  // Check user auth status
+  useAuthCheck();
+
   // Local state for image preview URL
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>("");
 
@@ -52,27 +54,19 @@ const EstateForm = () => {
     defaultValues: {
       name: "",
       location: "",
-      stateRegion: "",
+      stateRegion: "Lagos",
       logoUrl: "",
     },
   });
   const { insertEstate } = estateActions;
   const onSubmit = (data: createEstateData) => {
+    console.log("Valid submit:", data);
     dispatch(insertEstate(data));
     console.log("Data pushed to redux", data);
+    nextStepHandler();
   };
-
-  // Stepper state management
-  const [activeStep, setActiveStep] = useState(0);
-
-  const handleNextPage = () => {
-    setActiveStep((prev) => {
-      const next = prev + 1;
-      if (next <= 4) {
-        return next;
-      }
-      return 0;
-    });
+  const onInvalid = (errors: any) => {
+    console.log("Form invalid:", errors);
   };
 
   return (
@@ -83,7 +77,6 @@ const EstateForm = () => {
         minHeight: "60vh",
       }}
     >
-      <EstateCreationSteps activeStep={activeStep} />
       <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
         <Paper
           elevation={1}
@@ -94,7 +87,7 @@ const EstateForm = () => {
           }}
           component="form"
           noValidate
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit, onInvalid)}
         >
           {/* Heading */}
           <Typography
@@ -292,6 +285,14 @@ const EstateForm = () => {
                         </Typography>
                       )}
 
+                      {errors.logoUrl && (
+                        <Typography
+                          sx={{ fontSize: 12, color: "error.main", mt: 1 }}
+                        >
+                          {errors.logoUrl.message}
+                        </Typography>
+                      )}
+
                       {/* Safe check: Using field.value directly ensures instant synchronization */}
                       {field.value && logoPreviewUrl && !uploadLoading && (
                         <Typography
@@ -414,7 +415,6 @@ const EstateForm = () => {
                   <TextField
                     {...field}
                     select
-                    defaultValue="Lagos"
                     size="small"
                     error={!!errors.stateRegion}
                     helperText={
@@ -446,7 +446,6 @@ const EstateForm = () => {
                 bgcolor: "primary.main",
               }}
               endIcon={<Forward />}
-              onClick={handleNextPage}
               type="submit"
             >
               Continue
@@ -457,12 +456,12 @@ const EstateForm = () => {
         {/* Setup Guide UI for Desktop */}
         <Box
           sx={{
-            display: { xs: "none", md: "block" },
+            display: { xs: "block", md: "block" },
             p: 3,
             borderRadius: 1,
             border: "1px solid grey",
             mb: 2,
-            width: "33%",
+            width: { xs: "100%", md: "33%" },
           }}
         >
           <InfoOutlined />

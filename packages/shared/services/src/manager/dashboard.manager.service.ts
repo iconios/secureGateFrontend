@@ -3,7 +3,7 @@
  *
  */
 
-import { ActionContext } from "./manager.types";
+import { ServerManagerDashboardResponse } from "./manager.types";
 
 /*
 #Plan:
@@ -13,18 +13,45 @@ import { ActionContext } from "./manager.types";
 */
 
 const DashboardManagerService = async (
-  context: ActionContext,
+  token: string,
   config: { baseUrl: string },
 ) => {
+  // Step 1: Get and validate the necessary data
   const API_BASE_URL = config.baseUrl;
   if (!API_BASE_URL) {
     throw new Error("API_BASE_URL is not defined in environment variables");
   }
 
   try {
-    const token = await context.storage.get("auth_token");
     if (!token) throw new Error("Unauthorized");
-  } catch {}
+
+    // Step 2: Pass the data to the API
+    const response = await fetch(
+      `${API_BASE_URL}/estates_manager/estates/dashboard`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    // Step 3: Get the server response and send to the client
+    const result: ServerManagerDashboardResponse = await response.json();
+    console.log("DashboardManagerService result", result);
+    if (!result.success || !response.ok) {
+      throw new Error(result.message || "Failed to fetch dashboard data");
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching dashboard data", error);
+
+    if (error instanceof Error) throw error;
+
+    throw new Error("Error fetching dashboard data");
+  }
 };
 
 export default DashboardManagerService;

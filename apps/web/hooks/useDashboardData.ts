@@ -1,8 +1,9 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
 import DashboardManagerService from "@shared/services/manager/dashboard.manager.service";
-import { webStorage } from "../lib/server-storage";
 
-export const useDashboardData = () => {
+export const useDashboardData = (authToken: string) => {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (!apiBaseUrl) {
     throw new Error("Missing apiBaseUrl environment variable");
@@ -11,11 +12,8 @@ export const useDashboardData = () => {
   return useQuery({
     queryKey: ["dashboardData"],
     queryFn: () =>
-      DashboardManagerService(
-        { storage: webStorage },
-        {
-          baseUrl: apiBaseUrl,
-        },
-      ),
+      DashboardManagerService(authToken, {
+        baseUrl: apiBaseUrl,
+      }),
   });
 };
