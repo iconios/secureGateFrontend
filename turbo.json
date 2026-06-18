@@ -3,7 +3,8 @@
   "globalEnv": [
     "NODE_ENV",
     "NEW_RELIC_APP_NAME",
-    "NEW_RELIC_LICENSE_KEY"
+    "NEW_RELIC_LICENSE_KEY",
+    "API_BASE_URL"
   ],
   "ui": "tui",
   "tasks": {

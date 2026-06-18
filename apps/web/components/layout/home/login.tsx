@@ -337,22 +337,32 @@ export default function LoginForm() {
                 />
               </Box>
 
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    sx={{
-                      color: "divider",
-                      "&.Mui-checked": { color: "primary.main" },
-                    }}
+              <Controller
+                control={control}
+                name="rememberMe"
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        {...field}
+                        checked={field.value}
+                        onChange={(e) => {
+                          field.onChange(e.target.checked);
+                          setRememberMe(e.target.checked);
+                        }}
+                        sx={{
+                          color: "divider",
+                          "&.Mui-checked": { color: "primary.main" },
+                        }}
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" color="text.secondary">
+                        Remember this device for 30 days
+                      </Typography>
+                    }
                   />
-                }
-                label={
-                  <Typography variant="body2" color="text.secondary">
-                    Remember this device for 30 days
-                  </Typography>
-                }
+                )}
               />
 
               {/* Submit Button */}

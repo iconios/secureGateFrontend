@@ -1,23 +1,34 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   ArrowBackOutlined,
   ArrowForwardOutlined,
   BusinessOutlined,
   CheckCircleOutlined,
+  Error,
   HomeWorkOutlined,
   LockOutlined,
   VpnKeyOutlined,
 } from "@mui/icons-material";
-import { Box, Button, Divider, Paper, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  Divider,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../lib/store";
+import { showToast } from "../../../../utils/toast";
+import { ConfirmAndPayResult } from "./estate.types";
 
 type ConfirmAndPayProps = {
   prevStepHandler: () => void;
-  checkoutHandler?: () => void;
 };
 
 function CardShell({ children }: Readonly<{ children: ReactNode }>) {
@@ -271,18 +282,75 @@ function SummaryRow({
   );
 }
 
-const EstateConfirmAndPay = ({
-  prevStepHandler,
-  checkoutHandler,
-}: ConfirmAndPayProps) => {
+const EstateConfirmAndPay = ({ prevStepHandler }: ConfirmAndPayProps) => {
+  const [loading, setLoading] = useState(false);
   const currency = "\u20A6";
   const estate = useSelector((state: RootState) => state.estate);
-  const { name, location, stateRegion, households, period, plan, amount } =
-    estate;
+  const {
+    name,
+    location,
+    stateRegion,
+    households,
+    period,
+    plan,
+    amount,
+    logoUrl,
+    planId,
+  } = estate;
 
   const billingSuffix = period === "monthly" ? "/mo" : "/yr";
   const formattedAmount = `${currency}${amount.toLocaleString()}`;
   const formattedLocation = [location, stateRegion].filter(Boolean).join(", ");
+
+  const handleCheckout = async () => {
+    try {
+      // Set Loading
+      setLoading(true);
+
+      // Call the api and pass data to it
+      const response = await fetch("/api/payment/initialize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          plan_id: planId,
+          period,
+          name,
+          logo_url: logoUrl,
+          location,
+          state: stateRegion,
+        }),
+      });
+
+      console.log("Response from backend", response);
+      const result: ConfirmAndPayResult = await response.json();
+      console.log("Result from backend response", response);
+
+      if (!result.success) {
+        return (
+          <Alert severity="error" variant="filled">
+            <AlertTitle>Error</AlertTitle>
+            result.message
+          </Alert>
+        );
+      }
+
+      // Backend returns Paystack's authorization_url
+      const authorizationUrl = result.data?.authorization_url;
+      console.log("Authorization url", authorizationUrl);
+      window.location.href = result.data?.authorization_url ?? "";
+    } catch (error: any) {
+      return (
+        <Alert severity="error" variant="filled">
+          <AlertTitle>Error</AlertTitle>
+          {error.message ?? "Something went wrong"}
+        </Alert>
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box
@@ -584,7 +652,8 @@ const EstateConfirmAndPay = ({
                 fullWidth
                 variant="contained"
                 endIcon={<ArrowForwardOutlined />}
-                onClick={checkoutHandler}
+                onClick={handleCheckout}
+                disabled={loading}
                 sx={{
                   display: { xs: "none", md: "inline-flex" },
                   minHeight: 72,
@@ -715,7 +784,8 @@ const EstateConfirmAndPay = ({
           <Button
             variant="contained"
             endIcon={<ArrowForwardOutlined />}
-            onClick={checkoutHandler}
+            onClick={handleCheckout}
+            disabled={loading}
             sx={{
               flex: { xs: 1, sm: "0 1 420px" },
               height: { xs: 54, md: 62 },

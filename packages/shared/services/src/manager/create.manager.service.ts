@@ -6,7 +6,7 @@
  * - Create Manager: Submits new manager details to the API and handles the creation response.
  */
 
-import { ServerResponse } from "./manager.types";
+import { CreateManagerServerResponse } from "./manager.types";
 
 /*
 #Plan:
@@ -50,9 +50,11 @@ export const CreateManagerService = async (
     });
 
     // 3. Get the server response and send to the client
-    const result: ServerResponse = await response.json();
+    const result: CreateManagerServerResponse = await response.json();
     if (!response.ok || !result.success) {
-      throw new Error(result.error?.details || "Failed to create manager");
+      const errorDetails = (result.error as { code: string; details: string })
+        .details;
+      throw new Error(errorDetails || "Failed to create manager");
     }
 
     return result;

@@ -1,9 +1,10 @@
 "use client";
 
-import { BookOnline, HouseOutlined } from "@mui/icons-material";
+import { Add, BookOnline, HouseOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
+  Fab,
   Paper,
   Stack,
   Step,
@@ -195,6 +196,24 @@ const NoEstateYet = ({ nextStepHandler }: { nextStepHandler: () => void }) => {
           ))}
         </Stepper>
       )}
+      <Fab
+        color="primary"
+        aria-label="add estate"
+        onClick={() => {
+          nextStepHandler();
+        }}
+        variant="extended"
+        sx={{
+          display: "block",
+          position: "fixed",
+          bottom: 20,
+          right: 20,
+          zIndex: (theme) => theme.zIndex.speedDial,
+        }}
+      >
+        <Add sx={{ mr: 1 }} />
+        CREATE ESTATE
+      </Fab>
     </Box>
   );
 };

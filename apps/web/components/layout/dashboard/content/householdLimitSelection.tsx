@@ -51,10 +51,10 @@ const HouseholdLimitSelection = ({
   const [subscriptionPeriod, setSubscriptionPeriod] = useState<string | null>(
     "monthly",
   );
-  const { isError, error, data, isPending, refetch } = useSubscriptionPlans();
+  const { isError, error, data, isLoading, refetch } = useSubscriptionPlans();
   const { plan, period, households, amount } = storedEstate;
 
-  if (isPending) {
+  if (isLoading || !data) {
     return (
       <Box
         sx={{
@@ -65,7 +65,7 @@ const HouseholdLimitSelection = ({
           alignItems: "center",
         }}
       >
-        <CircularProgress size="large" />
+        <CircularProgress size={40} />
         <Typography
           sx={{
             fontSize: { xs: 10, md: 14 },
@@ -112,6 +112,7 @@ const HouseholdLimitSelection = ({
       upsertHousehold({
         period: period,
         amount: period === "monthly" ? plan?.monthly_fee : plan?.yearly_fee,
+        planId: selectedPlanId,
       }),
     );
   };
@@ -129,6 +130,7 @@ const HouseholdLimitSelection = ({
             ? plan?.monthly_fee
             : plan?.yearly_fee,
         plan: plan?.name,
+        planId: nextPlanId,
       }),
     );
   };

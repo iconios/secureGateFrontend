@@ -10,6 +10,10 @@
         "./estate": {
             "types": "./src/*/index.ts",
             "default": "./src/*/index.ts"
+        },
+        "./payment": {
+            "types": "./src/*/index.ts",
+            "default": "./src/*/index.ts"
         }
     },
     "scripts": {

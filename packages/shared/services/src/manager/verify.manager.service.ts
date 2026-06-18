@@ -6,7 +6,7 @@
  * - Verify Manager: Submits verification code to the API and handles the verification response.
  */
 
-import { ServerResponse } from "./manager.types";
+import { CodeVerificationServerResponse } from "./manager.types";
 
 /*
 #Plan:
@@ -50,9 +50,11 @@ export const VerifyManagerService = async (
     });
 
     // 3. Get the server response and send to the client
-    const result: ServerResponse = await response.json();
+    const result = (await response.json()) as CodeVerificationServerResponse;
     if (!response.ok || !result.success) {
-      throw new Error(result.error?.details || "Failed to verify manager");
+      const errorDetails = (result.error as { code: string; details: string })
+        .details;
+      throw new Error(errorDetails || "Failed to verify manager");
     }
 
     return result;

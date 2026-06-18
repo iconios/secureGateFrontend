@@ -12,23 +12,30 @@ import {
 } from "@mui/material";
 import CheckCircleOutlineOutlined from "@mui/icons-material/CheckCircleOutlineOutlined";
 import Image from "next/image";
+import { getLogoSrc } from "../../../../utils/logoSrcTransform";
 
-const EstateBanner = () => {
+type EstateBannerProps = {
+  logoUrl: string;
+  name: string;
+  status: string;
+  location: string;
+  state: string;
+  createdAt: string;
+};
+
+const EstateBanner = ({
+  logoUrl,
+  name,
+  status,
+  location,
+  state,
+  createdAt,
+}: EstateBannerProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const data = {
-    logoUrl: "/oaktree.png",
-    alt: "Oaktree",
-    name: "Oakwood Residency",
-    status: "active",
-    location: "Prime Residential Complex",
-    state: "Sector 14A",
-    created_at: "12 Jan 2023",
-    payment_status: "Up to date",
-  };
-
-  const isActive = data.status === "active";
+  const isActive = status === "active";
+  const logoSrc = getLogoSrc(logoUrl);
 
   return (
     <Paper
@@ -71,15 +78,17 @@ const EstateBanner = () => {
               justifyContent: "center",
             }}
           >
-            <Image
-              src={data.logoUrl}
-              alt={data.alt}
-              width={76}
-              height={76}
-              style={{
-                objectFit: "cover",
-              }}
-            />
+            {logoUrl.trim() && (
+              <Image
+                src={logoSrc!}
+                alt={name}
+                width={80}
+                height={80}
+                style={{
+                  objectFit: "cover",
+                }}
+              />
+            )}
           </Box>
 
           {/* Name, Address UI Container */}
@@ -101,11 +110,11 @@ const EstateBanner = () => {
                   lineHeight: 1.15,
                 }}
               >
-                {data.name}
+                {name}
               </Typography>
 
               <Chip
-                label={data.status.toUpperCase()}
+                label={status.toUpperCase()}
                 size="small"
                 icon={
                   <Box
@@ -145,7 +154,7 @@ const EstateBanner = () => {
                 fontWeight: 400,
               }}
             >
-              {data.location} • {data.state}
+              {location} • {state}
             </Typography>
           </Box>
         </Stack>
@@ -206,7 +215,7 @@ const EstateBanner = () => {
               color: "text.primary",
             }}
           >
-            {data.created_at}
+            {createdAt}
           </Typography>
         </Stack>
 
@@ -246,7 +255,7 @@ const EstateBanner = () => {
                 color: "text.primary",
               }}
             >
-              {data.payment_status}
+              {isActive ? "Up-to-date" : "unknown"}
             </Typography>
           </Stack>
         </Stack>

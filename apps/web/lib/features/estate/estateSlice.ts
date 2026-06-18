@@ -9,6 +9,7 @@ const initialState = {
   period: "monthly",
   amount: 0,
   plan: "",
+  planId: "",
 };
 
 const estateSlice = createSlice({
@@ -27,6 +28,7 @@ const estateSlice = createSlice({
       state.period = action.payload?.period ?? state.period;
       state.amount = action.payload?.amount ?? state.amount;
       state.plan = action.payload?.plan ?? state.plan;
+      state.planId = action.payload?.planId ?? state.planId;
     },
     updateName: (state, action) => {
       state.name = action.payload?.name ?? state.name;
@@ -39,6 +41,9 @@ const estateSlice = createSlice({
     },
     updateLogoUrl: (state, action) => {
       state.logoUrl = action.payload?.logoUrl ?? state.logoUrl;
+    },
+    updatePlanId: (state, action) => {
+      state.planId = action.payload?.planId ?? state.planId;
     },
     clearEstate: () => {
       return initialState;

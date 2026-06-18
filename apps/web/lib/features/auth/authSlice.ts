@@ -1,6 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
+type InitialState = {
+  user: {
+    id: string;
+    email: string;
+    full_name: string;
+  } | {},
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: {} | {
+    code: string;
+    details: string;
+  },
+  role: string;
+  status: string;
+}
+
+
+const initialState: InitialState = {
   user: {},
   isAuthenticated: false,
   isLoading: false,
@@ -36,6 +53,11 @@ const authSlice = createSlice({
       state.status = "failed";
     },
     logout: () => initialState,
+    hydrateSession: (state) => {
+      state.isAuthenticated = true;
+      state.isLoading = false;
+      state.status = "succeeded";
+    },
     updateUser: (state, action) => {
       state.user = {
         ...state.user,

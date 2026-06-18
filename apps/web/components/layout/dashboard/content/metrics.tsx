@@ -20,21 +20,31 @@ import {
 } from "@mui/material";
 import MetricCard from "./metricCard";
 
-const Metrics = () => {
-  const data = {
-    subscription_plan: "Premium",
-    max_principal_residents: 1000,
-    principal_residents_number: 850,
-    next_bill: "01 Feb 2024",
-    households: 320,
-    active_guests: 45,
-    flagged_guests: 3,
-    blacklisted_vehicles: 2,
-    open_incidents: 5,
-  };
+type MetricsProps = {
+  subscription_plan: string;
+  max_principal_residents: number;
+  principal_residents_number: number;
+  next_bill: string;
+  households: number;
+  active_guests?: number;
+  flagged_guests?: number;
+  blacklisted_vehicles?: number;
+  open_incidents?: number;
+};
 
+const Metrics = ({
+  subscription_plan,
+  max_principal_residents,
+  principal_residents_number,
+  next_bill,
+  households,
+  active_guests,
+  flagged_guests,
+  blacklisted_vehicles,
+  open_incidents,
+}: MetricsProps) => {
   const percentageSubscriptionUsage =
-    (data.principal_residents_number / data.max_principal_residents) * 100;
+    (principal_residents_number / max_principal_residents) * 100;
 
   return (
     <Box
@@ -92,7 +102,7 @@ const Metrics = () => {
                   lineHeight: 1.1,
                 }}
               >
-                {data.subscription_plan} Plan
+                {subscription_plan} Plan
               </Typography>
             </Box>
 
@@ -120,8 +130,7 @@ const Metrics = () => {
                     fontWeight: 500,
                   }}
                 >
-                  {data.principal_residents_number} /{" "}
-                  {data.max_principal_residents}
+                  {principal_residents_number} / {max_principal_residents}
                 </Typography>
 
                 <Typography
@@ -184,7 +193,7 @@ const Metrics = () => {
                 component="span"
                 sx={{ color: "text.primary", fontWeight: 500 }}
               >
-                {data.next_bill}
+                {next_bill}
               </Box>
             </Typography>
 
@@ -216,21 +225,21 @@ const Metrics = () => {
       >
         <MetricCard
           icon={<Person sx={{ color: "primary.main" }} />}
-          value={data.principal_residents_number}
+          value={principal_residents_number}
           label="Principal Residents"
           trend="+12"
         />
 
         <MetricCard
           icon={<House sx={{ color: "primary.main" }} />}
-          value={data.households}
+          value={households}
           label="Households"
           trend="+3"
         />
 
         <MetricCard
           icon={<HailOutlined sx={{ color: "primary.main" }} />}
-          value={data.active_guests}
+          value={active_guests ?? 0}
           label="Active Guests"
           trend="-5%"
           trendDirection="down"
@@ -238,21 +247,21 @@ const Metrics = () => {
 
         <MetricCard
           icon={<FlagOutlined sx={{ color: "error.main" }} />}
-          value={data.flagged_guests}
+          value={flagged_guests ?? 0}
           label="Flagged Guests"
           accentColor="error.main"
         />
 
         <MetricCard
           icon={<Block sx={{ color: "text.primary" }} />}
-          value={data.blacklisted_vehicles}
+          value={blacklisted_vehicles ?? 0}
           label="Blacklisted Vehicles"
           accentColor="text.primary"
         />
 
         <MetricCard
           icon={<ReportProblem sx={{ color: "error.main" }} />}
-          value={data.open_incidents}
+          value={open_incidents ?? 0}
           label="Open Incidents"
           accentColor="error.light"
         />

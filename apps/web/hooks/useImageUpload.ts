@@ -16,11 +16,11 @@ export type ImageUploadResult = {
   publicUrl: string;
 };
 
-export const useImageUpload = () => {
+export const useImageUpload = ({userId}: {userId: string}) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [path, setPath] = useState<string | null>(null); // ✅ Local state retained
+  const [publicUrl, setPublicUrl] = useState<string | null>(null); // Local state retained
 
   // Return a Promise containing the path string or null so it can be awaited reliably
   const handleFileUpload = async (
@@ -30,7 +30,7 @@ export const useImageUpload = () => {
 
     setError(null);
     setSuccess(null);
-    setPath(null);
+    setPublicUrl(null);
 
     // Step 1. Accept file and validate file type
     if (!file.type.startsWith("image/")) {
@@ -64,7 +64,7 @@ export const useImageUpload = () => {
           return;
         }
 
-        // 4. Upload to Supabase Bucket
+        // 4. Upload to storage Bucket
         try {
           const supabase = createClient(); // Instanced securely inside the execution scope
           const fileExt = file.name.split(".").pop();
@@ -74,10 +74,11 @@ export const useImageUpload = () => {
             crypto.randomUUID?.() || Math.random().toString(36).substring(2);
           const fileName = `${uniqueId}.${fileExt}`;
           const bucketName = BUCKET_NAME;
+          const filePath = `${userId}/${fileName}`;
 
           const { data, error: uploadError } = await supabase.storage
             .from(bucketName)
-            .upload(fileName, file, {
+            .upload(filePath, file, {
               cacheControl: "3600",
               upsert: false,
               contentType: file.type,
@@ -87,10 +88,10 @@ export const useImageUpload = () => {
 
           const { data: publicUrlData } = supabase.storage
             .from(bucketName)
-            .getPublicUrl(fileName);
+            .getPublicUrl(filePath);
 
           // Save the actual relative path returned by Supabase ('data.path')
-          setPath(data.path);
+          setPublicUrl(publicUrlData.publicUrl);
           setSuccess("Image successfully uploaded");
 
           console.log("Upload successful:", data);
@@ -126,6 +127,6 @@ export const useImageUpload = () => {
     error,
     success,
     loading,
-    path,
+    publicUrl,
   };
 };

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   ApartmentOutlined,
   NotificationsOutlined,
@@ -13,14 +12,13 @@ import {
   MenuItem,
   TextField,
 } from "@mui/material";
+import { MainTopBarProps } from "./estate.types";
 
 const MainTopBar = ({
   estates,
-}: {
-  estates: { id: string; name: string }[];
-}) => {
-  const [selectedEstateId, setSelectedEstateId] = useState("");
-
+  changeSelectedEstate,
+  selectedEstateId,
+}: MainTopBarProps) => {
   return (
     <Box
       component="form"
@@ -81,7 +79,7 @@ const MainTopBar = ({
           id="estate-selector"
           select
           value={selectedEstateId}
-          onChange={(event) => setSelectedEstateId(event.target.value)}
+          onChange={(event) => changeSelectedEstate(event.target.value)}
           size="small"
           slotProps={{
             select: {

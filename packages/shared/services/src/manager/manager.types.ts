@@ -25,16 +25,14 @@ export interface ServerSubscriptionPlansResponse {
   success: boolean;
   message: string;
   data: {
-    plansData: [
-      {
-        id: string;
-        description: string;
-        name: string;
-        household_limit: number;
-        monthly_fee: number;
-        yearly_fee: number;
-      },
-    ];
+    plansData: {
+      id: string;
+      description: string;
+      name: string;
+      household_limit: number;
+      monthly_fee: number;
+      yearly_fee: number;
+    }[];
   } | null;
   error: {
     code: string;
@@ -100,3 +98,61 @@ export interface ServerLogoutResponse {
     timestamp: string;
   };
 }
+
+export type FetchUserInfoServerResponse = {
+  success: boolean;
+  message: string;
+  data:
+    | {
+        user: {
+          id: string;
+          full_name: string;
+          email: string;
+        };
+        role: string;
+      }
+    | {};
+  error:
+    | {
+        code: string;
+        details: string;
+      }
+    | {};
+  metadata: {
+    timestamp: string;
+  };
+};
+
+export type CodeVerificationServerResponse = {
+  success: boolean;
+  message: string;
+  data:
+    | {
+        email: string;
+      }
+    | {};
+  error:
+    | {
+        code: string;
+        details: string;
+      }
+    | {};
+  metadata: {
+    timestamp: string;
+  };
+};
+
+export type CreateManagerServerResponse = {
+  success: boolean;
+  message: string;
+  data: {};
+  error:
+    | {
+        code: string;
+        details: string;
+      }
+    | {};
+  metadata: {
+    timestamp: string;
+  };
+};

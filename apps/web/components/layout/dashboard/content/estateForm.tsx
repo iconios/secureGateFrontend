@@ -19,27 +19,37 @@ import {
   InsertDriveFileOutlined,
 } from "@mui/icons-material";
 import { useForm, Controller } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEstateData, createEstateSchema } from "./estate.types";
 import { estateActions } from "../../../../lib/features/estate/estateSlice";
 import { useImageUpload } from "../../../../hooks/useImageUpload";
+import { RootState } from "../../../../lib/store";
+import useAuthCheck from "../../../../hooks/useAuthCheck";
+
+type User = {
+  id: string;
+  email: string;
+  full_name: string;
+}
 
 const allNigerianStates = getAllStates();
 
 const EstateForm = ({ nextStepHandler }: { nextStepHandler: () => void }) => {
-  // Check user auth status
+  // Local state for image preview URL and check authentication state
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>("");
   useAuthCheck();
 
-  // Local state for image preview URL
-  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>("");
-
+  // Get user id
+  const user = useSelector((state: RootState) => state.auth.user)
+  const userId = "id" in user ? user.id : ""
   // useImageUpload hook for handling image uploads and validations
   const {
     handleFileUpload,
     error: uploadError,
     loading: uploadLoading,
-  } = useImageUpload();
+    publicUrl
+  } = useImageUpload({userId});
 
   // useDispatch initialization
   const dispatch = useDispatch();
@@ -215,7 +225,8 @@ const EstateForm = ({ nextStepHandler }: { nextStepHandler: () => void }) => {
 
                           // If upload is successful, update the form field value with the returned path
                           if (uploadResult) {
-                            field.onChange(uploadResult.path);
+                            console.log("Estate form public url", uploadResult.publicUrl)
+                            field.onChange(uploadResult.publicUrl);
                             setLogoPreviewUrl(uploadResult.publicUrl); // Update local state with the public URL for preview
                           }
                         }}
