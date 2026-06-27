@@ -156,3 +156,18 @@ export type CreateManagerServerResponse = {
     timestamp: string;
   };
 };
+
+export type ForgotPasswordServerResponse = {
+  success: boolean;
+  message: string;
+  data: {} | null;
+  error:
+    | {
+        code: string;
+        details: string;
+      }
+    | {};
+  metadata: {
+    timestamp: string;
+  };
+};

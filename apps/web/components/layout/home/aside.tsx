@@ -101,8 +101,8 @@ export default function BrandColumn() {
                 maxWidth: "28rem",
               }}
             >
-              Digitise estate access control, resident management, and security
-              logs with Nigeria's most trusted gatehouse infrastructure.
+              Digitize estate access control, resident management, and security
+              logs with Nigeria&apos;s most trusted gatehouse infrastructure.
             </Typography>
           </Box>
 

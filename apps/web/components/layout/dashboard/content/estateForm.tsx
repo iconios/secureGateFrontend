@@ -27,12 +27,6 @@ import { useImageUpload } from "../../../../hooks/useImageUpload";
 import { RootState } from "../../../../lib/store";
 import useAuthCheck from "../../../../hooks/useAuthCheck";
 
-type User = {
-  id: string;
-  email: string;
-  full_name: string;
-}
-
 const allNigerianStates = getAllStates();
 
 const EstateForm = ({ nextStepHandler }: { nextStepHandler: () => void }) => {
@@ -41,15 +35,14 @@ const EstateForm = ({ nextStepHandler }: { nextStepHandler: () => void }) => {
   useAuthCheck();
 
   // Get user id
-  const user = useSelector((state: RootState) => state.auth.user)
-  const userId = "id" in user ? user.id : ""
+  const user = useSelector((state: RootState) => state.auth.user);
+  const userId = "id" in user ? user.id : "";
   // useImageUpload hook for handling image uploads and validations
   const {
     handleFileUpload,
     error: uploadError,
     loading: uploadLoading,
-    publicUrl
-  } = useImageUpload({userId});
+  } = useImageUpload({ userId });
 
   // useDispatch initialization
   const dispatch = useDispatch();
@@ -225,7 +218,10 @@ const EstateForm = ({ nextStepHandler }: { nextStepHandler: () => void }) => {
 
                           // If upload is successful, update the form field value with the returned path
                           if (uploadResult) {
-                            console.log("Estate form public url", uploadResult.publicUrl)
+                            console.log(
+                              "Estate form public url",
+                              uploadResult.publicUrl,
+                            );
                             field.onChange(uploadResult.publicUrl);
                             setLogoPreviewUrl(uploadResult.publicUrl); // Update local state with the public URL for preview
                           }

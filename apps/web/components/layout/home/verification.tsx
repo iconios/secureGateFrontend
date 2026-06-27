@@ -30,7 +30,7 @@ export default function VerificationForm({
   console.log("VerificationForm rendered with email:", email);
 
   // For the stepper component
-  const steps = ["Account", "Verify", "Log in"];
+  const steps = ["Create", "Verify", "Log in"];
   const activeStep = 1; // Set to 0 for first step, 1 for second, etc.
 
   // Initialize the necessary state variables for the form

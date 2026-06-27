@@ -1,5 +1,7 @@
+import { ForgotPassword } from "../../../../components/layout/dashboard/content/forgotPassword";
+
 const ForgotPasswordPage = () => {
-  return <h3>Forgot Password Page</h3>;
+  return <ForgotPassword />;
 };
 
 export default ForgotPasswordPage;

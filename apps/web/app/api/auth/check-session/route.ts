@@ -29,7 +29,7 @@ export const GET = async (request: NextRequest) => {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid session or failed to fetch user info",
+          message: result.message,
         },
         { status: 401 },
       );

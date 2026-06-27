@@ -34,7 +34,9 @@ export const DisplaySelectedEstateDetails = ({
 
   // 4. Normalize the data
   console.log("Estates data", estates);
-  const selectedEstateData = estates.find((item) => item.estate_id === selectedEstateId);
+  const selectedEstateData = estates.find(
+    (item) => item.estate_id === selectedEstateId,
+  );
   const estatesSummary = estates.map((item) => ({
     id: item.estate_id,
     name: item.estate_name,

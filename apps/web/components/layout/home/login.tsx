@@ -43,7 +43,7 @@ export default function LoginForm() {
   const [rememberMe, setRememberMe] = useState(false);
 
   // For the stepper component
-  const steps = ["Account", "Verify", "Log in"];
+  const steps = ["Create", "Verify", "Log in"];
   const activeStep = 2;
 
   // Initialize the necessary state variables for the form
@@ -184,6 +184,7 @@ export default function LoginForm() {
                   color: "primary.main",
                   fontWeight: 600,
                   fontSize: { xs: "1.875rem", md: "2.25rem" },
+                  textAlign: "center",
                 }}
               >
                 Welcome Back
@@ -193,6 +194,7 @@ export default function LoginForm() {
                 sx={{
                   color: "text.secondary",
                   mt: 0.5,
+                  textAlign: "center",
                 }}
               >
                 Access your residential management dashboard
@@ -252,6 +254,7 @@ export default function LoginForm() {
                       "& .MuiOutlinedInput-root": {
                         bgcolor: "background.default",
                         borderRadius: 2,
+                        mb: 1,
                       },
                     }}
                   />
@@ -267,13 +270,8 @@ export default function LoginForm() {
                     mb: 1,
                   }}
                 >
-                  <Typography
-                    variant="subtitle2"
-                    component="label"
-                    htmlFor="password"
-                  >
-                    Password
-                  </Typography>
+                  <Box />
+
                   <MuiLink
                     href="/forgot-password"
                     component={NextLink}

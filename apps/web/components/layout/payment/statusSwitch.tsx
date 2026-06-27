@@ -132,7 +132,7 @@ export const StatusSwitch = ({
         sx={{
           justifyContent: "center",
           alignItems: "center",
-          minHeight: "100vh"
+          minHeight: "100vh",
         }}
       >
         <CircularProgress />
@@ -152,7 +152,7 @@ export const StatusSwitch = ({
   Workflow Step 8:
   Prepare formatted display values.
   */
- const estateData = data.data.estate_payment;
+  const estateData = data.data.estate_payment;
   const estateName = estateData.estate_name ?? "Unknown Estate";
   const planName = estateData.plan_name ?? "Unknown";
   const householdLimit = estateData.household_limit ?? "1";

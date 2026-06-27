@@ -97,7 +97,7 @@ export default function RegistrationForm() {
   };
 
   // For the stepper component
-  const steps = ["Account", "Verify", "Log in"];
+  const steps = ["Create", "Verify", "Log in"];
   const activeStep = 0; // Set to 0 for first step, 1 for second, etc.
 
   return (

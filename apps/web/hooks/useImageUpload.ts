@@ -16,7 +16,7 @@ export type ImageUploadResult = {
   publicUrl: string;
 };
 
-export const useImageUpload = ({userId}: {userId: string}) => {
+export const useImageUpload = ({ userId }: { userId: string }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

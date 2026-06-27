@@ -6,3 +6,4 @@ export * from "./fetch.subscription_plans.service";
 export * from "./dashboard.manager.service";
 export * from "./logout.manager.service";
 export * from "./fetch.user.info";
+export * from "./forgot.password.service";

@@ -1,21 +1,24 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 type InitialState = {
-  user: {
-    id: string;
-    email: string;
-    full_name: string;
-  } | {},
+  user:
+    | {
+        id: string;
+        email: string;
+        full_name: string;
+      }
+    | {};
   isAuthenticated: boolean;
   isLoading: boolean;
-  error: {} | {
-    code: string;
-    details: string;
-  },
+  error:
+    | {}
+    | {
+        code: string;
+        details: string;
+      };
   role: string;
   status: string;
-}
-
+};
 
 const initialState: InitialState = {
   user: {},

@@ -57,3 +57,11 @@ export type MainTopBarProps = {
   selectedEstateId: string;
   changeSelectedEstate: (v: string) => void;
 };
+
+export const ForgotPasswordEmailSchema = z
+  .object({
+    email: z.email(),
+  })
+  .strict();
+
+export type ForgotPasswordEmail = z.infer<typeof ForgotPasswordEmailSchema>;

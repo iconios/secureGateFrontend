@@ -15,22 +15,27 @@ export default function HomeLayout({
 }>) {
   return (
     <Container
-      maxWidth="xl"
+      maxWidth={false}
+      disableGutters
       sx={{
         display: "flex",
-        flex: 1,
-        flexDirection: { xs: "column", lg: "row" },
-        px: 0,
-        mx: -3,
+        flexDirection: { xs: "column", md: "row" },
+        width: "100%",
+        minHeight: "100vh",
+        mx: "auto",
+        p: 0,
+        m: 0,
+        overflowX: "hidden",
       }}
     >
       {/* Aside section */}
       <Box
         component="aside"
         sx={{
-          width: { xs: "100%", lg: "30%" },
+          width: { xs: "100%", md: "30%" },
           display: "flex",
           flexDirection: "column",
+          minHeight: { xs: "auto", md: "100vh" },
         }}
       >
         {Aside}
@@ -40,9 +45,12 @@ export default function HomeLayout({
       <Box
         component="main"
         sx={{
-          width: { xs: "100%", lg: "70%" },
+          width: { xs: "100%", md: "70%" },
           display: "flex",
           flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
         }}
       >
         {RightColumn}
