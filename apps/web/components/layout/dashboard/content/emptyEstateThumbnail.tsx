@@ -22,7 +22,7 @@ export const EmptyEstateThumbnail = () => {
           borderRadius: "50%",
           backgroundColor: "grey",
           mb: 2,
-          mx: "auto"
+          mx: "auto",
         }}
       >
         <AddBusinessOutlined fontSize="large" />

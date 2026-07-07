@@ -33,11 +33,12 @@ import {
 } from "@mui/material";
 import { usePathname, useRouter } from "next/navigation";
 import { useNavigation } from "../../../providers/NavigationContext";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../../../lib/features/auth/authSlice";
 import useAuthCheck from "../../../hooks/useAuthCheck";
 import { useState } from "react";
 import { showToast } from "../../../utils/toast";
+import { RootState } from "../../../lib/store";
 
 const SidebarDrawer = () => {
   // Check whether user is authenticated. If no, return login page
@@ -45,6 +46,9 @@ const SidebarDrawer = () => {
   // Local state for auth redux store
   const { logout } = authActions;
   const dispatch = useDispatch();
+  const selectedEstateId = useSelector(
+    (state: RootState) => state.estate.estateId,
+  );
   // Local state for MUI theme
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -91,7 +95,7 @@ const SidebarDrawer = () => {
     {
       text: "Households",
       icon: <ApartmentOutlined />,
-      path: "/dashboard/settings",
+      path: `/dashboard/households?estateId=${selectedEstateId}`,
     },
     {
       text: "Residents",

@@ -8,13 +8,17 @@
 5. Render the UI
 */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EstatesData } from "./estate.types";
 import { Box } from "@mui/material";
 import MainTopBar from "./mainTopBar";
 import EstateBanner from "./estateBanner";
 import Metrics from "./metrics";
 import RecentGateActivityAlerts from "./gateActivityAlerts";
+import { useDispatch } from "react-redux";
+import { estateActions } from "../../../../lib/features/estate/estateSlice";
+
+const { insertEstateId } = estateActions;
 
 // 1. Accept and validate an array of estates
 export const DisplaySelectedEstateDetails = ({
@@ -24,12 +28,22 @@ export const DisplaySelectedEstateDetails = ({
 }) => {
   // 2. Model the estate selection state and data
   // Guard against empty or undefined estates array
+  const dispatch = useDispatch();
   const initialId = estates[0]?.estate_id ?? "";
+  console.log("Initial estate id", initialId);
   const [selectedEstateId, setSelectedEstateId] = useState<string>(initialId);
+
+  useEffect(() => {
+    if (!initialId) return;
+
+    setSelectedEstateId(initialId);
+    dispatch(insertEstateId(initialId));
+  }, [initialId, dispatch]);
 
   // 3. Handle the selected Id change
   const handleSelectedEstateIdChange = (newId: string) => {
     setSelectedEstateId(newId);
+    dispatch(insertEstateId(newId));
   };
 
   // 4. Normalize the data

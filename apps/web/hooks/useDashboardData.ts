@@ -62,5 +62,6 @@ export const useDashboardData = (authToken?: string | null) => {
         baseUrl: apiBaseUrl,
       });
     },
+    staleTime: 5 * 60 * 1000,
   });
 };
