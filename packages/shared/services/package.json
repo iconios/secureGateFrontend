@@ -18,6 +18,10 @@
         "./household": {
             "types": "./src/*/index.ts",
             "default": "./src/*/index.ts"
+        },
+        "./resident": {
+            "types": "./src/*/index.ts",
+            "default": "./src/*/index.ts"
         }
     },
     "scripts": {

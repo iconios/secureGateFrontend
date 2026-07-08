@@ -8,8 +8,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
+  Stack,
   Typography,
 } from "@mui/material";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../../lib/store";
+import { Close } from "@mui/icons-material";
 
 export const AddHouseholdWizardDialog = ({
   open,
@@ -19,6 +24,7 @@ export const AddHouseholdWizardDialog = ({
   onClose: () => void;
 }) => {
   const [activeStep, setActiveStep] = useState(0);
+  const estateId = useSelector((state: RootState) => state.estate.estateId);
 
   const handleClose = () => {
     setActiveStep(0);
@@ -50,7 +56,7 @@ export const AddHouseholdWizardDialog = ({
   const renderStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return <HouseholdUnitDetailsProvision estateId={""} />;
+        return <HouseholdUnitDetailsProvision estateId={estateId} />;
       case 1:
         return <Typography>Step 2 page</Typography>;
       case 2:
@@ -67,9 +73,50 @@ export const AddHouseholdWizardDialog = ({
       sx={{
         textAlign: "center",
         p: 4,
+        borderRadius: 2,
+        width: "70%",
       }}
     >
+      {/** Heading and subheading */}
+      <Stack
+        direction="row"
+        sx={{
+          mb: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Box>
+          <Typography
+            variant="h2"
+            sx={{
+              color: "text.primary",
+              fontSize: { xs: 20, md: 28 },
+              fontWeight: 600,
+            }}
+          >
+            Add New Household
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: "text.secondary",
+              fontSize: { xs: 14, md: 18 },
+            }}
+          >
+            Initialize a new residential record with the estate system.
+          </Typography>
+        </Box>
+        <IconButton onClick={handleClose}>
+          <Close fontSize="medium" />
+        </IconButton>
+      </Stack>
+
+      {/** Household creation steps */}
       <EstateCreationSteps activeStep={activeStep} />
+
+      {/** Changing content UI based on household creation steps */}
       <Dialog open={open} onClose={() => handleClose()}>
         <DialogTitle>Add Household Wizard</DialogTitle>
         <DialogContent dividers={true}>

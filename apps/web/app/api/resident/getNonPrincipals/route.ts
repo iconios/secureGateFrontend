@@ -1,7 +1,7 @@
-// Fetch Household Data By Estate API
+// Fetch Non-Principal Residents By Estate API
 
 import { NextRequest, NextResponse } from "next/server";
-import { fetchHouseholdsByEstate } from "@shared/services/household";
+import { getAllNonPrincipalsByEstate } from "@shared/services/resident";
 import { webStorage } from "../../../../lib/server-storage";
 
 export const GET = async (req: NextRequest) => {
@@ -60,7 +60,7 @@ export const GET = async (req: NextRequest) => {
     }
 
     // 1. Run the service fully on the server
-    const result = await fetchHouseholdsByEstate(
+    const result = await getAllNonPrincipalsByEstate(
       token,
       apiUrl,
       estateId,
@@ -73,7 +73,7 @@ export const GET = async (req: NextRequest) => {
       return NextResponse.json(
         {
           success: false,
-          message: result?.message ?? "Error fetching households data",
+          message: result?.message ?? "Error fetching residents data",
           data: null,
           error: result?.error,
         },
@@ -85,16 +85,16 @@ export const GET = async (req: NextRequest) => {
     return NextResponse.json(
       {
         success: true,
-        message: result.message ?? "Households data fetched successfully",
+        message: result.message ?? "Residents data fetched successfully",
         data: result.data,
         error: null,
       },
       { status: 200 },
     );
   } catch (error: unknown) {
-    console.error("Households data error:", error);
+    console.error("Residents data error:", error);
     const errMessage =
-      error instanceof Error ? error.message : "Error fetching households data";
+      error instanceof Error ? error.message : "Error fetching residents data";
     return NextResponse.json(
       {
         success: false,

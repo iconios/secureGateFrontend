@@ -1,9 +1,7 @@
-"use client";
-
-import { FetchHouseholdsByEstateServerResponse } from "@shared/services/household";
+import { GetNonPrincipalsByEstateServerResponse } from "@shared/services/resident/types";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-export const useFetchedHouseholdDataByEstate = (
+export const useGetAllPrincipalsByEstate = (
   estateId: string,
   page?: string,
   pageSize?: string,
@@ -12,7 +10,7 @@ export const useFetchedHouseholdDataByEstate = (
   const safeEstateId = estateId?.trim() ?? "";
 
   return useQuery({
-    queryKey: ["households", `${safeEstateId}`, searchTerm, page, pageSize],
+    queryKey: ["residents", `${safeEstateId}`, searchTerm, page, pageSize],
     enabled: Boolean(safeEstateId),
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -24,18 +22,18 @@ export const useFetchedHouseholdDataByEstate = (
 
       const queryString = params.toString();
       const url = queryString
-        ? `/api/household/fetchHousehold?${queryString}`
-        : `/api/household/fetchHousehold`;
+        ? `/api/resident/getNonPrincipals?${queryString}`
+        : `/api/resident/getNonPrincipals`;
       const response = await fetch(url, {
         method: "GET",
         cache: "no-store",
       });
 
       const result = await response.json();
-      console.log("Fetch households data response", result);
+      console.log("Get residents data response", result);
 
       if (!result.success) {
-        throw new Error(result.message ?? "Failed to fetch household data", {
+        throw new Error(result.message ?? "Failed to get residents data", {
           cause: {
             code: result.error.code,
             details: result.error.details,
@@ -43,7 +41,7 @@ export const useFetchedHouseholdDataByEstate = (
         });
       }
 
-      return result.data as FetchHouseholdsByEstateServerResponse["data"];
+      return result.data as GetNonPrincipalsByEstateServerResponse["data"];
     },
     staleTime: 5 * 60 * 1000,
     placeholderData: keepPreviousData,

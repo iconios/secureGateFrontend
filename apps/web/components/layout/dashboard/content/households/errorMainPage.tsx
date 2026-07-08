@@ -17,144 +17,169 @@ export const ErrorHouseholdsPage = ({
   return (
     <Box
       sx={{
-        position: "relative",
-        mb: { xs: 2, md: 3 },
+        minHeight: { xs: "80vh", md: "100vh" },
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        px: { xs: 1, md: 3 },
+        py: { xs: 2, md: 4 },
       }}
     >
-      <Paper
-        elevation={1}
+      <Box
         sx={{
-          width: 104,
-          height: 104,
-          mb: { xs: 2, md: 3 },
-          justifyContent: "center",
-          alignItems: "center",
-          display: "flex",
-          mx: "auto",
-          borderRadius: 2,
-          boxShadow: "0 14px 35px rgba(15 23 42 0.14)",
-        }}
-      >
-        <WifiOff
-          sx={{
-            fontSize: 48,
-            color: "primary.main",
-          }}
-        />
-      </Paper>
-      <Typography
-        variant="h1"
-        sx={{
-          fontWeight: 700,
-          fontSize: { xs: 24, md: 30 },
-          lineHeight: 1.2,
-          color: "text.primary",
-          mx: "auto",
-          mb: 1.5,
-        }}
-      >
-        Unable to load household data
-      </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          color: "text.secondary",
-          fontSize: { xs: 14, md: 16 },
-          lineHeight: 1.5,
-          maxWidth: 440,
-          mb: { xs: 3, md: 3.5 },
-        }}
-      >
-        {message ||
-          "The household management service is currently unreachable. Our security protocol prevents data access until a stable connection is re-established."}
-      </Typography>
-      <Button
-        size="large"
-        startIcon={<Refresh />}
-        variant="contained"
-        sx={{
-          minWidth: 190,
-          height: 48,
-          color: "#ffffff",
-          fontWeight: 700,
-          mx: "auto",
-          borderRadius: 1,
-          mb: { xs: 2, md: 3 },
-          textTransform: "none",
-          boxShadow: "0 8px 18px rgba(25, 118, 210, 0.25)",
-        }}
-        onClick={() => refetch()}
-      >
-        Retry Connection
-      </Button>
-      <Paper
-        elevation={1}
-        sx={{
-          px: { xs: 1, md: 2 },
-          py: { xs: 2, md: 3 },
-          borderRadius: 1,
           width: "100%",
-          border: "1px solid",
-          overflow: "hidden",
-          textAlign: "left",
+          maxWidth: 550,
         }}
       >
-        <Stack
-          direction="row"
+        <Paper
+          elevation={1}
           sx={{
-            justifyContent: "space-between",
+            width: 104,
+            height: 104,
+            mb: { xs: 2, md: 3 },
+            justifyContent: "center",
             alignItems: "center",
-            width: "100%",
-            px: { xs: 2, md: 2.5 },
-            py: 1.75,
+            display: "flex",
+            mx: "auto",
+            borderRadius: 2,
+            boxShadow: "0 14px 35px rgba(15 23 42 0.14)",
           }}
         >
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <InfoOutlined
-              sx={{
-                color: "text.primary",
-                fontSize: 20,
-              }}
-            />
-            <Typography
-              variant="body1"
-              sx={{
-                color: "text.primary",
-                fontWeight: 700,
-                fontSize: { xs: 12, md: 15 },
-              }}
-            >
-              Diagnostics
-            </Typography>
-          </Stack>
-
-          <Chip
-            label="CRITICAL"
-            size="small"
+          <WifiOff
             sx={{
-              height: 24,
-              fontSize: 11,
-              fontWeight: 800,
-              color: "#b91c1c",
-              backgroundColor: "#fee2e2",
-              borderRadius: 1,
+              fontSize: 48,
+              color: "primary.main",
             }}
           />
-        </Stack>
+        </Paper>
+        <Typography
+          variant="h1"
+          sx={{
+            fontWeight: 700,
+            fontSize: { xs: 24, md: 30 },
+            lineHeight: 1.2,
+            color: "text.primary",
+            mx: "auto",
+            textAlign: "center",
+            mb: 1.5,
+          }}
+        >
+          Unable to load household data
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "text.secondary",
+            fontSize: { xs: 14, md: 16 },
+            lineHeight: 1.5,
+            maxWidth: 440,
+            mb: { xs: 3, md: 3.5 },
+            textAlign: "center",
+            mx: "auto",
+          }}
+        >
+          {message ||
+            "The household management service is currently unreachable. Our security protocol prevents data access until a stable connection is re-established."}
+        </Typography>
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Button
+            size="large"
+            startIcon={<Refresh />}
+            variant="contained"
+            sx={{
+              minWidth: 190,
+              height: 48,
+              color: "#ffffff",
+              fontWeight: 700,
+              mx: "auto",
+              borderRadius: 1,
+              mb: { xs: 2, md: 3 },
+              textTransform: "none",
+              boxShadow: "0 8px 18px rgba(25, 118, 210, 0.25)",
+            }}
+            onClick={() => refetch()}
+          >
+            Retry Connection
+          </Button>
+        </Box>
+        <Paper
+          elevation={1}
+          sx={{
+            px: { xs: 1, md: 2 },
+            py: { xs: 2, md: 3 },
+            borderRadius: 1,
+            width: "100%",
+            overflow: "hidden",
+            textAlign: "left",
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+              px: { xs: 2, md: 2.5 },
+              py: 1.75,
+            }}
+          >
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+              <InfoOutlined
+                sx={{
+                  color: "text.primary",
+                  fontSize: 20,
+                }}
+              />
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "text.primary",
+                  fontWeight: 700,
+                  fontSize: { xs: 12, md: 15 },
+                }}
+              >
+                Diagnostics
+              </Typography>
+            </Stack>
 
-        <DiagnosticRow
-          label="Error Reference:"
-          value={code || "ERR_CONNECTION_REFUSED"}
-          danger
-        />
+            <Chip
+              label="CRITICAL"
+              size="small"
+              sx={{
+                height: 24,
+                fontSize: 11,
+                fontWeight: 800,
+                color: "#b91c1c",
+                backgroundColor: "#fee2e2",
+                borderRadius: 1,
+              }}
+            />
+          </Stack>
 
-        <DiagnosticRow
-          label="Request ID:"
-          value={requestId || "NOT AVAILABLE"}
-        />
+          <DiagnosticRow
+            label="Error Reference:"
+            value={code || "ERR_CONNECTION_REFUSED"}
+            danger
+          />
 
-        <DiagnosticRow label="Timestamp:" value={new Date().toISOString()} />
-      </Paper>
+          <DiagnosticRow
+            label="Request ID:"
+            value={requestId || "NOT AVAILABLE"}
+          />
+
+          <DiagnosticRow
+            label="Timestamp:"
+            value={`${new Date().toISOString()} UTC`}
+          />
+        </Paper>
+      </Box>
     </Box>
   );
 };

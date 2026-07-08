@@ -63,6 +63,9 @@ export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
         ? (error.cause as any).details
         : "NOT_AVAILABLE";
 
+    console.log("Message", errorMessage);
+    console.log("code", errorCode);
+    console.log("RequestId", errorRequestId);
     return (
       <ErrorHouseholdsPage
         message={errorMessage}
@@ -83,7 +86,7 @@ export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
     return null;
   }
 
-  if (data.households === null) {
+  if (data.households.length === 0) {
     return <EmptyHousehold estateName={data?.estateName ?? "Unknown"} />;
   }
 
@@ -96,14 +99,20 @@ export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
       }}
     >
       <HouseholdsHeader estateName={data.estateName} />
-      <HouseholdsTable
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        householdsTableData={{
-          households: data.households,
-          pagination: data.pagination,
+      <Box
+        sx={{
+          mb: { xs: 2, md: 4 },
         }}
-      />
+      >
+        <HouseholdsTable
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          householdsTableData={{
+            households: data.households,
+            pagination: data.pagination,
+          }}
+        />
+      </Box>
       <HouseholdsFooter />
     </Box>
   );
