@@ -90,42 +90,54 @@ const SidebarDrawer = () => {
     {
       text: "Overview",
       icon: <Dashboard />,
+      activePath: "/dashboard",
       path: "/dashboard",
     },
     {
       text: "Households",
       icon: <ApartmentOutlined />,
+      activePath: "/dashboard/households",
       path: `/dashboard/households?estateId=${selectedEstateId}`,
     },
     {
       text: "Residents",
       icon: <Person2Outlined />,
+      activePath: "/dashboard/residents",
       path: "/dashboard/residents",
     },
-    { text: "Guests", icon: <HailOutlined />, path: "/dashboard/guests" },
+    { text: "Guests", 
+      icon: <HailOutlined />,
+      activePath: "/dashboard/guests",
+      path: "/dashboard/guests" 
+    },
     {
       text: "Vehicles",
       icon: <DriveEtaOutlined />,
+      activePath: "/dashboard/vehicles",
       path: "/dashboard/vehicles",
     },
     {
       text: "Permits",
       icon: <AssistantDirectionOutlined />,
+      activePath: "/dashboard/permits",
       path: "/dashboard/permits",
     },
     {
       text: "Guards",
       icon: <ShieldOutlined />,
+      activePath: "/dashboard/guards",
       path: "/dashboard/guards",
     },
     {
       text: "Incidents",
       icon: <ReportProblem />,
+      activePath: "/dashboard/incidents",
       path: "/dashboard/incidents",
     },
     {
       text: "Blacklists",
       icon: <Block />,
+      activePath: "/dashboard/block",
       path: "/dashboard/block",
     },
   ];
@@ -134,21 +146,25 @@ const SidebarDrawer = () => {
     {
       text: "Subscription",
       icon: <Payment />,
+      activePath: "/dashboard/subscriptions",
       path: "/dashboard/subscriptions",
     },
     {
       text: "Audit Logs",
       icon: <ManageAccounts />,
+      activePath: "/dashboard/audit-logs",
       path: "/dashboard/audit-logs",
     },
     {
       text: "Reports & Exports",
       icon: <Analytics />,
+      activePath: "/dashboard/reports",
       path: "/dashboard/reports",
     },
     {
       text: "Settings",
       icon: <Settings />,
+      activePath: "/dashboard/settings",
       path: "/dashboard/settings",
     },
   ];
@@ -228,7 +244,7 @@ const SidebarDrawer = () => {
       >
         <List>
           {navItems.map((item) => {
-            const isActive = pathname === item.path;
+            const isActive = pathname === item.activePath;
             return (
               <ListItem key={item.text} disablePadding>
                 <ListItemButton
@@ -275,7 +291,7 @@ const SidebarDrawer = () => {
 
         <List>
           {adminItems.map((item) => {
-            const isActive = pathname === item.path;
+            const isActive = pathname === item.activePath;
             return (
               <ListItem key={item.text} disablePadding>
                 <ListItemButton

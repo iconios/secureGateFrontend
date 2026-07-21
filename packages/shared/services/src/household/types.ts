@@ -4,6 +4,10 @@ export type FetchHouseholdsByEstateServerResponse = {
   data: {
     estateId: string;
     estateName: string;
+    allEstates: {
+      id: string;
+      name: string;
+    }[],
     summary: {
       householdsTotal: number;
       membersTotal: number;

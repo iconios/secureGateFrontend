@@ -110,6 +110,7 @@ export type FetchUserInfoServerResponse = {
           email: string;
         };
         role: string;
+        token: string;
       }
     | {};
   error:

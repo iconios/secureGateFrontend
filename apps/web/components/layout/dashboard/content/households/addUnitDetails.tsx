@@ -16,13 +16,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useForm, Controller, useWatch } from "react-hook-form";
-import { UnitDetailsData, UnitDetailsSchema } from "./types";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useDispatch, useSelector } from "react-redux";
-import { householdActions } from "../../../../../lib/features/household/householdSlice";
-import { RootState } from "../../../../../lib/store";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { Controller, useWatch, useFormContext } from "react-hook-form";
+import { CreateHouseholdInputType } from "./types";
+import { ChangeEvent, useMemo, useState } from "react";
 import { useFetchBlockOrStreet } from "../../../../../hooks/useFetchBlockOrStreet";
 
 export const HouseholdUnitDetailsProvision = ({
@@ -30,9 +26,7 @@ export const HouseholdUnitDetailsProvision = ({
 }: {
   estateId: string;
 }) => {
-  const dispatch = useDispatch();
   const { isError, error, data, isPending } = useFetchBlockOrStreet(estateId);
-  const { insertOneUnitDetails } = householdActions;
 
   const [blockOrStreetText, setBlockOrStreetText] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -40,51 +34,47 @@ export const HouseholdUnitDetailsProvision = ({
     setDialogOpen(false);
   };
 
-  // Read initial or persisitent values from redux
-  const unitDetailsData = useSelector(
-    (state: RootState) => state.household?.households?.[0]?.house,
-  );
-
-  const defaultValues = useMemo<UnitDetailsData>(
-    () => ({
-      unitNumber: unitDetailsData?.unitNumber ?? "",
-      blockOrStreet: unitDetailsData?.blockOrStreet ?? "",
-    }),
-    [unitDetailsData],
-  );
-
-  const { control, reset } = useForm({
-    mode: "onChange",
-    resolver: zodResolver(UnitDetailsSchema),
-    defaultValues,
-  });
+  // Local state for custom options
+  const [customOptions, setCustomOptions] = useState<string[]>([]);
+  const { control, setValue } = useFormContext<CreateHouseholdInputType>();
 
   const watchedValues = useWatch({
     control,
   });
 
-  const unitNumber = watchedValues.unitNumber ?? "";
-  const blockOrStreet = watchedValues.blockOrStreet ?? "";
-
-  // Reactively monitor changes to dispatch them immediately to redux
-  useEffect(() => {
-    reset(defaultValues);
-  }, [defaultValues, reset]);
-
-  useEffect(() => {
-    dispatch(
-      insertOneUnitDetails({
-        unitNumber,
-        blockOrStreet,
-      }),
-    );
-  }, [unitNumber, blockOrStreet, dispatch, insertOneUnitDetails]);
+  const unitNumber = watchedValues?.households?.[0]?.house?.unitNumber ?? "";
+  const blockOrStreet =
+    watchedValues?.households?.[0]?.house?.blockOrStreet ?? "";
 
   const fullUnitAddress = [unitNumber, blockOrStreet].filter(Boolean).join(" ");
 
-  const options: string[] = data ?? [];
-  const addToOptions = (v: string): void => {
-    options.push(v);
+  const options = useMemo(() => {
+    const fetchedOptions = data ?? [];
+
+    return Array.from(
+      new Set(
+        [...fetchedOptions, ...customOptions]
+          .map((item) => item.trim())
+          .filter(Boolean),
+      ),
+    );
+  }, [data, customOptions]);
+
+  const addToOptions = (value: string): void => {
+    const cleanedValue = value.trim();
+
+    if (!cleanedValue) return;
+
+    setCustomOptions((prev) => {
+      if (prev.includes(cleanedValue)) return prev;
+      return [...prev, cleanedValue];
+    });
+
+    // setValue expects the full path for nested households structure
+    setValue(`households.0.house.blockOrStreet`, cleanedValue, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
 
   return (
@@ -99,7 +89,7 @@ export const HouseholdUnitDetailsProvision = ({
       >
         {/* Form fields for unit details */}
         <Controller
-          name="unitNumber"
+          name="households.0.house.unitNumber"
           control={control}
           render={({ field, fieldState }) => (
             <Grid
@@ -131,7 +121,7 @@ export const HouseholdUnitDetailsProvision = ({
           )}
         />
         <Controller
-          name="blockOrStreet"
+          name="households.0.house.blockOrStreet"
           control={control}
           render={({ field, fieldState }) => (
             <Grid
@@ -162,18 +152,19 @@ export const HouseholdUnitDetailsProvision = ({
               >
                 {isError && <Typography>{error.message}</Typography>}
                 {isPending && <CircularProgress size="large" color="primary" />}
-                {options?.map((item) => (
-                  <MenuItem key={item}>{item}</MenuItem>
+                {options.map((item) => (
+                  <MenuItem key={item} value={item}>
+                    {item}
+                  </MenuItem>
                 ))}
-                <MenuItem>
-                  <Button
-                    onClick={() => {
-                      setDialogOpen(true);
-                    }}
-                    variant="contained"
-                  >
-                    Add New
-                  </Button>
+                <MenuItem
+                  value=""
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setDialogOpen(true);
+                  }}
+                >
+                  + Add New
                 </MenuItem>
               </TextField>
             </Grid>
@@ -245,36 +236,55 @@ export const HouseholdUnitDetailsProvision = ({
       <Dialog
         open={dialogOpen}
         onClose={handleDialogClose}
-        maxWidth="sm"
-        fullScreen={false}
+        maxWidth="xs"
         aria-labelledby="estate-block-or-street-options-adder"
       >
         <DialogTitle>
-          <Typography>Add New Estate Block Or Street</Typography>
-          <IconButton
-            aria-label="close"
-            onClick={() => {
-              handleDialogClose();
+          <Stack
+            direction="row"
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            <Close />
-          </IconButton>
+            <Typography
+              variant="h2"
+              sx={{
+                color: "text.primary",
+                fontWeight: 700,
+                fontSize: { xs: 14, md: 20 },
+              }}
+            >
+              Add New Estate Block Or Street
+            </Typography>
+            <IconButton
+              aria-label="close"
+              onClick={() => {
+                handleDialogClose();
+              }}
+            >
+              <Close />
+            </IconButton>
+          </Stack>
         </DialogTitle>
         <DialogContent dividers={true}>
-          <DialogContentText>
-            Please enter the new estate block or street you wish to create
-            households for
+          <DialogContentText sx={{ mb: 2 }}>
+            Please enter the new estate block or street you wish to add
           </DialogContentText>
           <TextField
-            label="Enter Block or Street Name"
+            label="Block or Street Name"
             variant="outlined"
             value={blockOrStreetText}
+            fullWidth
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setBlockOrStreetText(e.target.value);
             }}
           />
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
+        <DialogActions
+          sx={{ p: 3, display: "flex", justifyContent: "space-between" }}
+        >
           <Button
             onClick={handleDialogClose}
             color="inherit"
@@ -284,11 +294,9 @@ export const HouseholdUnitDetailsProvision = ({
           </Button>
           <Button
             onClick={() => {
-              if (blockOrStreetText !== "") {
-                addToOptions(blockOrStreetText);
-                setBlockOrStreetText("");
-                handleDialogClose();
-              }
+              addToOptions(blockOrStreetText);
+              setBlockOrStreetText("");
+              handleDialogClose();
             }}
             disabled={blockOrStreetText === ""}
             variant="contained"

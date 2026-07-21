@@ -60,6 +60,7 @@ export const fetchHouseholdsByEstate = async (
 
     try {
       result = await response.json();
+      console.log("Households by estate data", result);
     } catch {
       return errorResponseHelper(
         "Invalid server response while fetching households data.",

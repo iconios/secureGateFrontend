@@ -46,6 +46,9 @@ const termiiPhoneSchema = z
       cleaned = `234${cleaned.slice(1)}`;
     }
     return cleaned;
+  })
+  .refine((value) => /^234\d{10}$/.test(value), {
+    message: "Enter a valid Nigerian phone number",
   });
 export const NewResidentSchema = z
   .object({
@@ -59,3 +62,78 @@ export const NewResidentSchema = z
   .strict();
 
 export type NewResidentType = z.infer<typeof NewResidentSchema>;
+
+const emailSchema = z
+  .email("Enter a valid email address")
+  .trim()
+  .transform((v) => v.toLowerCase());
+
+const blockOrStreetSchema = z
+  .string()
+  .trim()
+  .min(2, "Block or street is required")
+  .max(100, "Block or street is too long");
+
+export const HouseDetailsSchema = z.object({
+  unitNumber: z
+    .string()
+    .trim()
+    .min(1, "Unit number is required")
+    .max(50, "Unit number is too long"),
+  blockOrStreet: blockOrStreetSchema,
+});
+
+export const CreatedResidentSchema = z.object({
+  mode: z.literal("create"),
+  fullName: z
+    .string()
+    .trim()
+    .min(2, "Full name is required")
+    .max(100, "Full name is too long"),
+  email: emailSchema,
+  phone: termiiPhoneSchema,
+  gender: genderEnum.default("male"),
+  photoUrl: z.url(),
+  dateOfBirth: z
+    .string()
+    .min(1, "Date of birth is required")
+    .refine((value) => !Number.isNaN(Date.parse(value)), {
+      message: "Enter a valid date of birth",
+    }),
+});
+
+export type CreatedResidentType = z.infer<typeof CreatedResidentSchema>;
+
+export const LinkedResidentSchema = z.object({
+  mode: z.literal("link"),
+  personId: z.string().trim().min(1, "Select an existing resident"),
+});
+
+export type LinkedMemberType = z.infer<typeof LinkedResidentSchema>;
+
+export const ResidentSchema = z.discriminatedUnion("mode", [
+  LinkedResidentSchema,
+  CreatedResidentSchema,
+]);
+
+export const HouseholdSchema = z.object({
+  house: HouseDetailsSchema,
+  principalResident: ResidentSchema,
+  members: z.array(ResidentSchema),
+});
+
+export const CreateHouseholdInputSchema = z.object({
+  households: z.array(HouseholdSchema),
+});
+
+export type CreateHouseholdInputType = z.infer<
+  typeof CreateHouseholdInputSchema
+>;
+
+export type CreateHouseholdFormInput = z.input<
+  typeof CreateHouseholdInputSchema
+>;
+
+export type CreateHouseholdPayload = z.output<
+  typeof CreateHouseholdInputSchema
+>;

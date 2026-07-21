@@ -18,6 +18,7 @@ type InitialState = {
       };
   role: string;
   status: string;
+  token: string;
 };
 
 const initialState: InitialState = {
@@ -27,6 +28,7 @@ const initialState: InitialState = {
   error: {},
   role: "",
   status: "",
+  token: "",
 };
 
 const authSlice = createSlice({
@@ -39,13 +41,14 @@ const authSlice = createSlice({
       state.status = "loading";
     },
     loginSuccess: (state, action) => {
-      const { user, role } = action.payload;
+      const { user, role, token } = action.payload;
       state.user = user;
       state.isLoading = false;
       state.isAuthenticated = true;
       state.error = {};
       state.role = role;
       state.status = "succeeded";
+      state.token = token;
     },
     loginFailure: (state, action) => {
       const { error } = action.payload;
@@ -54,6 +57,10 @@ const authSlice = createSlice({
       state.error = error;
       state.user = {};
       state.status = "failed";
+    },
+    insertAuthToken: (state, action) => {
+      const { token } = action.payload;
+      state.token = token ?? state.token;
     },
     logout: () => initialState,
     hydrateSession: (state) => {

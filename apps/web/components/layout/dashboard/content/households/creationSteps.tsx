@@ -25,8 +25,7 @@ export const HouseholdCreationSteps = ({ step }: { step: number }) => {
   return (
     <Box
       sx={{
-        width: "100%",
-        mb: { xs: 2, md: 4 },
+        my: 2,
       }}
     >
       <Stepper
@@ -38,18 +37,7 @@ export const HouseholdCreationSteps = ({ step }: { step: number }) => {
       >
         {steps.map((step) => (
           <Step key={step.label}>
-            <StepLabel>
-              {step.label}
-              {step.content && (
-                <Box
-                  sx={{
-                    fontSize: { xs: 12, md: 14 },
-                  }}
-                >
-                  {step.content}
-                </Box>
-              )}
-            </StepLabel>
+            <StepLabel>{step.label}</StepLabel>
           </Step>
         ))}
       </Stepper>

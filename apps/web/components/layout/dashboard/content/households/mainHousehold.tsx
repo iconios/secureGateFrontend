@@ -22,11 +22,14 @@ import { HouseholdsHeader } from "./headerForHouseholds";
 import { HouseholdsTable } from "./householdsTable";
 import { HouseholdsFooter } from "./footerForHouseholds";
 import { Box } from "@mui/material";
+import MainTopBar from "../mainTopBar";
 
 export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  console.log("Initial estate id", estateId);
+  const [selectedEstateId, setSelectedEstateId] = useState<string>(estateId);
 
   useEffect(() => {
     if (!searchTerm) return;
@@ -39,7 +42,7 @@ export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
   }, [searchTerm]);
 
   const { isError, error, data, isPending, isLoading, isFetching, refetch } =
-    useFetchedHouseholdDataByEstate(estateId, "", "", debouncedSearchTerm);
+    useFetchedHouseholdDataByEstate(selectedEstateId, "", "", debouncedSearchTerm);
 
   useEffect(() => {
     if (data === null) {
@@ -84,10 +87,23 @@ export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
   //  the page redirects to the main overview page
   if (data === null) {
     return null;
-  }
+  }  
+
+  const allUserEstates = data.allEstates;
 
   if (data.households.length === 0) {
-    return <EmptyHousehold estateName={data?.estateName ?? "Unknown"} />;
+    return (
+      <>
+        <MainTopBar 
+          estates={allUserEstates} 
+          selectedEstateId={selectedEstateId} 
+          changeSelectedEstate={setSelectedEstateId} 
+        />
+        <EmptyHousehold 
+          estateName={data?.estateName ?? "Unknown"} 
+        />
+      </>
+    );
   }
 
   return (
@@ -98,6 +114,11 @@ export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
         width: "100%",
       }}
     >
+      <MainTopBar 
+        estates={allUserEstates} 
+        selectedEstateId={selectedEstateId} 
+        changeSelectedEstate={setSelectedEstateId} 
+      />
       <HouseholdsHeader estateName={data.estateName} />
       <Box
         sx={{
