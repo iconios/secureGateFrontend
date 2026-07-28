@@ -35,9 +35,13 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useGetAllNonPrincipalsByEstate } from "../../../../../hooks/useGetAllNonPrincipalsByEstate";
 
-export const AddPrincipalResident = () => {
-  // Local state for image preview URL and check authentication state
-  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>("");
+export const AddPrincipalResident = ({
+  photoPreviewUrl,
+  setPhotoPreviewUrl,
+}: {
+  photoPreviewUrl: string;
+  setPhotoPreviewUrl: (v: string) => void;
+}) => {
   useAuthCheck();
 
   // Other local state variables
@@ -46,12 +50,11 @@ export const AddPrincipalResident = () => {
   const [debounceSearchTerm, setDebounceSearchTerm] = useState("");
 
   // React Hook Form context
-  const { setValue, control, clearErrors } =
-    useFormContext<
-        CreateHouseholdFormInput,
-        unknown,
-        CreateHouseholdPayload    
-        >();
+  const { setValue, control, clearErrors } = useFormContext<
+    CreateHouseholdFormInput,
+    unknown,
+    CreateHouseholdPayload
+  >();
 
   // Local state and handler for Tabs
   const principalMode =
@@ -130,9 +133,7 @@ export const AddPrincipalResident = () => {
   });
 
   // Get user id
-  const user = useSelector(
-    (state: RootState) => (state as RootState).auth.user,
-  );
+  const user = useSelector((state: unknown) => (state as RootState).auth.user);
   const userId = user && "id" in user ? user.id : "";
   // useImageUpload hook for handling image uploads and validations
   const {

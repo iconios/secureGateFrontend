@@ -13,12 +13,24 @@ import {
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../lib/store";
-import { Close } from "@mui/icons-material";
+import {
+  ArrowBackOutlined,
+  ArrowForwardOutlined,
+  CancelOutlined,
+  Close,
+  PostAdd,
+} from "@mui/icons-material";
 import { AddPrincipalResident } from "./addPrincipalResident";
 import { HouseholdCreationSteps } from "./creationSteps";
 import { FormProvider, useForm } from "react-hook-form";
-import { CreateHouseholdInputSchema, CreateHouseholdInputType } from "./types";
+import {
+  CreateHouseholdFormInput,
+  CreateHouseholdInputSchema,
+  CreateHouseholdPayload,
+} from "./types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AddMemberResident } from "./addMemberResident";
+import { ReviewAndSubmit } from "./reviewAndSubmit";
 
 enum HouseholdWizardSteps {
   UnitDetails = 0,
@@ -36,10 +48,25 @@ export const AddHouseholdWizardDialog = ({
 }) => {
   // Local state variables
   const [activeStep, setActiveStep] = useState(0);
+  const [customOptions, setCustomOptions] = useState<string[]>([]);
   const estateId = useSelector((state: RootState) => state.estate.estateId);
 
+  // Local state for image preview URL and check authentication state
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string>("");
+
+  const handleSetCustomOptions = (v: string) => {
+    setCustomOptions((prev) => {
+      if (prev.includes(v)) return prev;
+      return [...prev, v];
+    });
+  };
+
   // Form initialization
-  const methods = useForm<CreateHouseholdInputType>({
+  const methods = useForm<
+    CreateHouseholdFormInput,
+    unknown,
+    CreateHouseholdPayload
+  >({
     mode: "onBlur",
     resolver: zodResolver(CreateHouseholdInputSchema),
     defaultValues: {
@@ -49,15 +76,14 @@ export const AddHouseholdWizardDialog = ({
             unitNumber: "",
             blockOrStreet: "",
           },
-          // default to creating a new principal resident
           principalResident: {
             mode: "create",
             fullName: "",
             email: "",
             phone: "",
+            gender: "male",
             photoUrl: "",
             dateOfBirth: "",
-            gender: "male" as const satisfies "male" | "female",
           },
           members: [],
         },
@@ -78,6 +104,11 @@ export const AddHouseholdWizardDialog = ({
   };
 
   const handleNext = async () => {
+    if (activeStep === HouseholdWizardSteps.Review) {
+      await handleSubmit(handleFormSubmit)();
+      return;
+    }
+
     let fieldsToValidate: Array<
       | `households.${number}.house`
       | `households.${number}.principalResident`
@@ -117,16 +148,32 @@ export const AddHouseholdWizardDialog = ({
   const renderStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return <HouseholdUnitDetailsProvision estateId={estateId} />;
+        return (
+          <HouseholdUnitDetailsProvision
+            estateId={estateId}
+            customOptions={customOptions}
+            handleSetCustomOptions={handleSetCustomOptions}
+          />
+        );
       case 1:
-        return <AddPrincipalResident />;
+        return (
+          <AddPrincipalResident
+            photoPreviewUrl={photoPreviewUrl}
+            setPhotoPreviewUrl={setPhotoPreviewUrl}
+          />
+        );
       case 2:
-        return <Typography>Step 3 page</Typography>;
+        return <AddMemberResident />;
       case 3:
-        return <Typography>Step 4 page</Typography>;
+        return <ReviewAndSubmit />;
       default:
         return <Typography>Unknown Step</Typography>;
     }
+  };
+
+  // Handler for form submit
+  const handleFormSubmit = async (data: CreateHouseholdPayload) => {
+    console.log(data);
   };
 
   return (
@@ -187,14 +234,28 @@ export const AddHouseholdWizardDialog = ({
             px: 3,
           }}
         >
-          <Button onClick={handleClose}>Cancel</Button>
           <Button
+            onClick={handleClose}
+            variant="outlined"
+            startIcon={<CancelOutlined />}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="outlined"
             onClick={handleBack}
-            sx={{ display: activeStep === 0 ? "none" : "block" }}
+            sx={{
+              display: activeStep === 0 ? "none" : "block",
+            }}
           >
             Back
           </Button>
-          <Button onClick={handleNext} variant="contained" color="primary">
+          <Button
+            onClick={handleNext}
+            variant="contained"
+            color="primary"
+            endIcon={activeStep === 3 ? <PostAdd /> : <ArrowForwardOutlined />}
+          >
             {activeStep === 3 ? "Submit" : "Next"}
           </Button>
         </DialogActions>

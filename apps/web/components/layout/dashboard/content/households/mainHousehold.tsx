@@ -42,7 +42,12 @@ export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
   }, [searchTerm]);
 
   const { isError, error, data, isPending, isLoading, isFetching, refetch } =
-    useFetchedHouseholdDataByEstate(selectedEstateId, "", "", debouncedSearchTerm);
+    useFetchedHouseholdDataByEstate(
+      selectedEstateId,
+      "",
+      "",
+      debouncedSearchTerm,
+    );
 
   useEffect(() => {
     if (data === null) {
@@ -87,21 +92,19 @@ export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
   //  the page redirects to the main overview page
   if (data === null) {
     return null;
-  }  
+  }
 
   const allUserEstates = data.allEstates;
 
   if (data.households.length === 0) {
     return (
       <>
-        <MainTopBar 
-          estates={allUserEstates} 
-          selectedEstateId={selectedEstateId} 
-          changeSelectedEstate={setSelectedEstateId} 
+        <MainTopBar
+          estates={allUserEstates}
+          selectedEstateId={selectedEstateId}
+          changeSelectedEstate={setSelectedEstateId}
         />
-        <EmptyHousehold 
-          estateName={data?.estateName ?? "Unknown"} 
-        />
+        <EmptyHousehold estateName={data?.estateName ?? "Unknown"} />
       </>
     );
   }
@@ -114,10 +117,10 @@ export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
         width: "100%",
       }}
     >
-      <MainTopBar 
-        estates={allUserEstates} 
-        selectedEstateId={selectedEstateId} 
-        changeSelectedEstate={setSelectedEstateId} 
+      <MainTopBar
+        estates={allUserEstates}
+        selectedEstateId={selectedEstateId}
+        changeSelectedEstate={setSelectedEstateId}
       />
       <HouseholdsHeader estateName={data.estateName} />
       <Box

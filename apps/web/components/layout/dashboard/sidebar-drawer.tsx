@@ -105,10 +105,11 @@ const SidebarDrawer = () => {
       activePath: "/dashboard/residents",
       path: "/dashboard/residents",
     },
-    { text: "Guests", 
+    {
+      text: "Guests",
       icon: <HailOutlined />,
       activePath: "/dashboard/guests",
-      path: "/dashboard/guests" 
+      path: "/dashboard/guests",
     },
     {
       text: "Vehicles",

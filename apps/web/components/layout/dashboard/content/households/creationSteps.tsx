@@ -11,7 +11,7 @@ const steps = [
       "Enter or link up the principal resident details for the household",
   },
   {
-    label: "Household members",
+    label: "Household members (optional)",
     content: "Enter the details or link up to each household member",
   },
   {

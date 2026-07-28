@@ -26,7 +26,7 @@ const useAuthCheck = () => {
             authActions.loginSuccess({
               user: result.data.user,
               role: result.data.role,
-              token: result.data.token
+              token: result.data.token,
             }),
           );
         } else {

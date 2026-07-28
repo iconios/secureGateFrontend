@@ -116,6 +116,9 @@ export const ResidentSchema = z.discriminatedUnion("mode", [
   CreatedResidentSchema,
 ]);
 
+export type ResidentFormInput = z.input<typeof ResidentSchema>;
+export type ResidentPayload = z.output<typeof ResidentSchema>;
+
 export const HouseholdSchema = z.object({
   house: HouseDetailsSchema,
   principalResident: ResidentSchema,

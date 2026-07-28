@@ -1,3 +1,4 @@
+import "../newrelic.cjs";
 import { Metadata } from "next";
 import ReactQueryProvider from "../providers/ReactQueryProvider";
 import ThemeProvider from "../providers/ThemeProvider";

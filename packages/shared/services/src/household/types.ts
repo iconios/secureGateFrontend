@@ -7,7 +7,7 @@ export type FetchHouseholdsByEstateServerResponse = {
     allEstates: {
       id: string;
       name: string;
-    }[],
+    }[];
     summary: {
       householdsTotal: number;
       membersTotal: number;

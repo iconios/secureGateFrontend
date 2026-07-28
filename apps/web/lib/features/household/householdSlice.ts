@@ -44,10 +44,7 @@ const householdSlice = createSlice({
     ) => {
       const { householdIndex, member } = action.payload || {};
       if (!state.households[householdIndex]) return;
-      if (!state.households[householdIndex].members) {
-        state.households[householdIndex].members = [];
-      }
-
+      state.households[householdIndex].members ??= [];
       state.households[householdIndex].members?.push(member);
     },
     removeOneMemberDetails: (

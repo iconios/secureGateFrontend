@@ -11,6 +11,7 @@ const initialState = {
   plan: "",
   planId: "",
   estateId: "",
+  estateBlockOrStreet: [],
 };
 
 const estateSlice = createSlice({
@@ -51,6 +52,9 @@ const estateSlice = createSlice({
     },
     insertEstateId: (state, action) => {
       state.estateId = action.payload ?? state.estateId;
+    },
+    insertEstateBlockOrStreet: (state, action) => {
+      state.estateBlockOrStreet = action.payload ?? state.estateBlockOrStreet;
     },
   },
 });

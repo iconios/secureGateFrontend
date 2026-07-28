@@ -17,14 +17,18 @@ import {
   Typography,
 } from "@mui/material";
 import { Controller, useWatch, useFormContext } from "react-hook-form";
-import { CreateHouseholdInputType } from "./types";
+import { CreateHouseholdFormInput, CreateHouseholdPayload } from "./types";
 import { ChangeEvent, useMemo, useState } from "react";
 import { useFetchBlockOrStreet } from "../../../../../hooks/useFetchBlockOrStreet";
 
 export const HouseholdUnitDetailsProvision = ({
   estateId,
+  customOptions,
+  handleSetCustomOptions,
 }: {
   estateId: string;
+  customOptions: string[];
+  handleSetCustomOptions: (v: string) => void;
 }) => {
   const { isError, error, data, isPending } = useFetchBlockOrStreet(estateId);
 
@@ -35,8 +39,11 @@ export const HouseholdUnitDetailsProvision = ({
   };
 
   // Local state for custom options
-  const [customOptions, setCustomOptions] = useState<string[]>([]);
-  const { control, setValue } = useFormContext<CreateHouseholdInputType>();
+  const { control, setValue } = useFormContext<
+    CreateHouseholdFormInput,
+    unknown,
+    CreateHouseholdPayload
+  >();
 
   const watchedValues = useWatch({
     control,
@@ -65,10 +72,7 @@ export const HouseholdUnitDetailsProvision = ({
 
     if (!cleanedValue) return;
 
-    setCustomOptions((prev) => {
-      if (prev.includes(cleanedValue)) return prev;
-      return [...prev, cleanedValue];
-    });
+    handleSetCustomOptions(cleanedValue);
 
     // setValue expects the full path for nested households structure
     setValue(`households.0.house.blockOrStreet`, cleanedValue, {
