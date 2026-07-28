@@ -14,7 +14,6 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../lib/store";
 import {
-  ArrowBackOutlined,
   ArrowForwardOutlined,
   CancelOutlined,
   Close,
@@ -30,7 +29,7 @@ import {
 } from "./types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddMemberResident } from "./addMemberResident";
-import { ReviewAndSubmit } from "./reviewAndSubmit";
+import { AddReviewAndSubmit } from "./addReview&Submit";
 
 enum HouseholdWizardSteps {
   UnitDetails = 0,
@@ -165,7 +164,7 @@ export const AddHouseholdWizardDialog = ({
       case 2:
         return <AddMemberResident />;
       case 3:
-        return <ReviewAndSubmit />;
+        return <AddReviewAndSubmit />;
       default:
         return <Typography>Unknown Step</Typography>;
     }

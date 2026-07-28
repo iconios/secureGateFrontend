@@ -778,7 +778,7 @@ export const AddMemberResident = () => {
                       sx={{
                         mt: 1,
                         p: 1,
-                        cursor: "pointer",
+                        cursor: isMobile ? undefined : "pointer",
                         border: "1px solid",
                         borderRadius: 1,
                         borderColor: isSelected ? "primary.main" : "divider",
