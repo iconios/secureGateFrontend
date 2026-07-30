@@ -17,6 +17,7 @@ import Metrics from "./metrics";
 import RecentGateActivityAlerts from "./gateActivityAlerts";
 import { useDispatch } from "react-redux";
 import { estateActions } from "../../../../lib/features/estate/estateSlice";
+import { ServerManagerDashboardResponse } from "@shared/services/manager";
 
 const { insertEstateId } = estateActions;
 
@@ -51,6 +52,7 @@ export const DisplaySelectedEstateDetails = ({
   const selectedEstateData = estates.find(
     (item) => item.estate_id === selectedEstateId,
   );
+  console.log("Selected estate data", selectedEstateData);
   const estatesSummary = estates.map((item) => ({
     id: item.estate_id,
     name: item.estate_name,
@@ -83,11 +85,12 @@ export const DisplaySelectedEstateDetails = ({
         subscription_plan={
           selectedEstateData?.estate_subscription_plan_name ?? ""
         }
-        max_principal_residents={
+        max_residents={
           selectedEstateData?.estate_subscription_plan_household_limit ?? 0
         }
+        residents_number={selectedEstateData?.resident_count ?? 0}
         principal_residents_number={
-          selectedEstateData?.estate_number_of_households ?? 0
+          selectedEstateData?.principal_resident_count ?? 0
         }
         next_bill={localDateFormatter(
           selectedEstateData?.estate_payment_expires_at ?? "",

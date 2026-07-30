@@ -51,10 +51,41 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../lib/store";
 import { useImageUpload } from "../../../../../hooks/useImageUpload";
-import { useGetAllNonPrincipalsByEstate } from "../../../../../hooks/useGetAllNonPrincipalsByEstate";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-export const AddMemberResident = () => {
+export const AddMemberResident = ({
+  searchTerm,
+  setSearchTerm,
+  fetchedResidents,
+  isError,
+  error,
+  isSuccess,
+  isLoading,
+  isFetching,
+  refetch,
+  setShouldFetchExistingResidents,
+  shouldFetchExistingResidents,
+}: {
+  searchTerm: string;
+  setSearchTerm: (v: string) => void;
+  fetchedResidents:
+    | {
+        id: string;
+        fullName: string;
+        phone: string;
+        email: string;
+        photoUrl: string;
+      }[]
+    | [];
+  isError: boolean;
+  error: Error | null;
+  isSuccess: boolean;
+  isLoading: boolean;
+  isFetching: boolean;
+  refetch: () => void;
+  setShouldFetchExistingResidents: (v: boolean) => void;
+  shouldFetchExistingResidents: boolean;
+}) => {
   // Local state for image preview URL and check authentication state
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>("");
   useAuthCheck();
@@ -63,8 +94,6 @@ export const AddMemberResident = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const estateId = useSelector((state: RootState) => state.estate.estateId);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debounceSearchTerm, setDebounceSearchTerm] = useState("");
 
   // React Hook Form context
   const { control: householdControl } = useFormContext<
@@ -205,35 +234,12 @@ export const AddMemberResident = () => {
     name: "personId",
   });
 
-  const shouldFetchExistingResidents =
-    memberMode === "link" && Boolean(estateId);
-
-  const { isError, error, data, isSuccess, isLoading, isFetching, refetch } =
-    useGetAllNonPrincipalsByEstate(
-      estateId,
-      "1",
-      "20",
-      debounceSearchTerm,
-      shouldFetchExistingResidents,
-    );
-  const fetchedResidents =
-    data && "nonPrincipals" in data ? data.nonPrincipals : [];
-  console.log({
-    shouldFetchExistingResidents,
-    estateId,
-    isLoading,
-    isFetching,
-    isSuccess,
-    isError,
-    rawData: data,
-    fetchedResidents,
-    fetchedResidentsLength: fetchedResidents.length,
-  });
+  useEffect(() => {
+    setShouldFetchExistingResidents(memberMode === "link" && Boolean(estateId));
+  }, [estateId, memberMode, setShouldFetchExistingResidents]);
 
   // Get user id
-  const user = useSelector(
-    (state: RootState) => (state as RootState).auth.user,
-  );
+  const user = useSelector((state: RootState) => state.auth.user);
   const userId = user && "id" in user ? user.id : "";
   // useImageUpload hook for handling image uploads and validations
   const {
@@ -242,16 +248,19 @@ export const AddMemberResident = () => {
     loading: uploadLoading,
   } = useImageUpload({ userId });
 
-  useEffect(() => {
-    const delayDebounceFunction = setTimeout(() => {
-      setDebounceSearchTerm(searchTerm.trim());
-    }, 500);
-
-    return () => clearTimeout(delayDebounceFunction);
-  }, [searchTerm]);
-
   return (
     <Box>
+      <Typography
+        variant="h2"
+        sx={{
+          color: "text.primary",
+          mb: 1,
+          fontSize: { xs: 16, md: 22 },
+          fontWeight: 700,
+        }}
+      >
+        Add Household Members
+      </Typography>
       <Typography
         variant="body2"
         sx={{
@@ -714,7 +723,7 @@ export const AddMemberResident = () => {
 
             {isError && (
               <Box>
-                <Typography>{error.message}</Typography>
+                <Typography>{error?.message}</Typography>
                 <Button variant="contained" onClick={() => refetch()}>
                   Refetch
                 </Button>
@@ -880,12 +889,15 @@ export const AddMemberResident = () => {
             ? member.fullName
             : (linkedResident?.fullName ?? "Linked resident");
 
-        const email = member.mode === "create" ? member.email : "";
+        const email =
+          member.mode === "create"
+            ? member.email
+            : (linkedResident?.email ?? "Linked resident email");
 
         const phone =
           member.mode === "create"
             ? member.phone
-            : (linkedResident?.phone ?? "");
+            : (linkedResident?.phone ?? "Linked resident phone");
 
         const initials = fullName
           .split(" ")

@@ -47,6 +47,8 @@ export type EstatesData = {
   estate_payment_expires_at: string | null;
   estate_payment_paid_at: string | null;
   estate_payment_status: "pending" | "paid" | "failed" | null;
+  principal_resident_count: number;
+  resident_count: number;
 };
 
 export type MainTopBarProps = {

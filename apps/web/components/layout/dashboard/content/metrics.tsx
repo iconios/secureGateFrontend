@@ -22,7 +22,8 @@ import MetricCard from "./metricCard";
 
 type MetricsProps = {
   subscription_plan: string;
-  max_principal_residents: number;
+  max_residents: number;
+  residents_number: number;
   principal_residents_number: number;
   next_bill: string;
   households: number;
@@ -34,7 +35,8 @@ type MetricsProps = {
 
 const Metrics = ({
   subscription_plan,
-  max_principal_residents,
+  max_residents,
+  residents_number,
   principal_residents_number,
   next_bill,
   households,
@@ -43,8 +45,7 @@ const Metrics = ({
   blacklisted_vehicles,
   open_incidents,
 }: MetricsProps) => {
-  const percentageSubscriptionUsage =
-    (principal_residents_number / max_principal_residents) * 100;
+  const percentageSubscriptionUsage = (residents_number / max_residents) * 100;
 
   return (
     <Box
@@ -130,7 +131,7 @@ const Metrics = ({
                     fontWeight: 500,
                   }}
                 >
-                  {principal_residents_number} / {max_principal_residents}
+                  {residents_number} / {max_residents}
                 </Typography>
 
                 <Typography

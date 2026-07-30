@@ -81,6 +81,15 @@ export const HouseholdUnitDetailsProvision = ({
     });
   };
 
+  const ADD_NEW_OPTION = "__add_new__";
+
+  const fetchErrorMessage =
+    isError && error instanceof Error
+      ? error.message
+      : isError
+        ? "Unable to load blocks or streets"
+        : undefined;
+
   return (
     <>
       <Grid
@@ -127,52 +136,66 @@ export const HouseholdUnitDetailsProvision = ({
         <Controller
           name="households.0.house.blockOrStreet"
           control={control}
-          render={({ field, fieldState }) => (
-            <Grid
-              size={{
-                xs: 12,
-                md: 6,
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 1,
-                  color: "text.secondary",
-                  fontWeight: 600,
+          render={({ field, fieldState }) => {
+            const errorMessage = fieldState.error?.message ?? fetchErrorMessage;
+
+            return (
+              <Grid
+                size={{
+                  xs: 12,
+                  md: 6,
                 }}
               >
-                BLOCK / STREET
-              </Typography>
-              <TextField
-                variant="outlined"
-                size="medium"
-                placeholder="Skyview Towers, West Wing"
-                fullWidth
-                select
-                {...field}
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              >
-                {isError && <Typography>{error.message}</Typography>}
-                {isPending && <CircularProgress size="large" color="primary" />}
-                {options.map((item) => (
-                  <MenuItem key={item} value={item}>
-                    {item}
-                  </MenuItem>
-                ))}
-                <MenuItem
-                  value=""
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setDialogOpen(true);
+                <Typography
+                  variant="body2"
+                  sx={{
+                    mb: 1,
+                    color: "text.secondary",
+                    fontWeight: 600,
                   }}
                 >
-                  + Add New
-                </MenuItem>
-              </TextField>
-            </Grid>
-          )}
+                  BLOCK / STREET
+                </Typography>
+                <TextField
+                  select
+                  fullWidth
+                  variant="outlined"
+                  size="medium"
+                  value={field.value ?? ""}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  inputRef={field.ref}
+                  disabled={isPending}
+                  error={Boolean(errorMessage)}
+                  helperText={
+                    isPending ? "Loading blocks and streets..." : errorMessage
+                  }
+                  onChange={(event) => {
+                    const value = event.target.value;
+
+                    if (value === ADD_NEW_OPTION) {
+                      setDialogOpen(true);
+                      return;
+                    }
+
+                    field.onChange(value);
+                  }}
+                >
+                  {!isPending && !isError && options.length === 0 && (
+                    <MenuItem disabled>No blocks or streets found</MenuItem>
+                  )}
+
+                  {options.map((item) => (
+                    <MenuItem key={item} value={item}>
+                      {item}
+                    </MenuItem>
+                  ))}
+
+                  <MenuItem value={ADD_NEW_OPTION}>+ Add New</MenuItem>
+                </TextField>
+              </Grid>
+            );
+          }}
         />
 
         <Grid size={12}>

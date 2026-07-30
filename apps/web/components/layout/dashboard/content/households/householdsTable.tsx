@@ -18,15 +18,18 @@ import {
 import { HouseholdsTableData } from "./types";
 import { EmptyHouseholdTable } from "./emptyTable";
 import { SearchOutlined } from "@mui/icons-material";
+import { HouseholdTableSkeleton } from "./skeletonHouseholdsTable";
 
 export const HouseholdsTable = ({
   householdsTableData,
   searchTerm,
   setSearchTerm,
+  isFetching,
 }: {
   householdsTableData: HouseholdsTableData;
   searchTerm: string;
   setSearchTerm: (v: string) => void;
+  isFetching: boolean;
 }) => {
   const data = householdsTableData?.households;
 
@@ -91,53 +94,61 @@ export const HouseholdsTable = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.map((row) => (
-                <TableRow key={row.id} hover>
-                  <TableCell>
-                    <Typography sx={{ fontSize: 12, fontWeight: 700 }}>
-                      {row.code}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography sx={{ fontSize: 12, fontWeight: 700 }}>
-                      {row.unitNumber}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={1}>
-                      <Avatar
-                        src={row.principalResident?.photoUrl ?? undefined}
-                        alt={row.principalResident?.fullName ?? undefined}
-                        sx={{ width: 24, height: 24 }}
-                      />
+              {isFetching ? (
+                <HouseholdTableSkeleton />
+              ) : (
+                data.map((row) => (
+                  <TableRow key={row.id} hover>
+                    <TableCell>
                       <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.primary",
-                          fontSize: { xs: 12, md: 16 },
-                          fontWeight: 700,
-                        }}
+                        sx={{ fontSize: { xs: 12, md: 16 }, fontWeight: 700 }}
                       >
-                        {row.principalResident?.fullName}
+                        {row.code}
                       </Typography>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    <Typography sx={{ fontSize: { xs: 12, md: 16 } }}>
-                      {row.memberCount > 1
-                        ? `${row.memberCount} members`
-                        : `${row.memberCount} member`}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography sx={{ fontSize: { xs: 12, md: 16 } }}>
-                      {row.assistantCount > 1
-                        ? `${row.assistantCount} assistants`
-                        : `${row.assistantCount} assistant`}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      <Typography
+                        sx={{ fontSize: { xs: 12, md: 16 }, fontWeight: 700 }}
+                      >
+                        {row.unitNumber}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="row" spacing={1}>
+                        <Avatar
+                          src={row.principalResident?.photoUrl ?? undefined}
+                          alt={row.principalResident?.fullName ?? undefined}
+                          sx={{ width: 24, height: 24 }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "text.primary",
+                            fontSize: { xs: 12, md: 16 },
+                            fontWeight: 700,
+                          }}
+                        >
+                          {row.principalResident?.fullName}
+                        </Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Typography sx={{ fontSize: { xs: 12, md: 16 } }}>
+                        {row.memberCount > 1
+                          ? `${row.memberCount} members`
+                          : `${row.memberCount} member`}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography sx={{ fontSize: { xs: 12, md: 16 } }}>
+                        {row.assistantCount > 1
+                          ? `${row.assistantCount} assistants`
+                          : `${row.assistantCount} assistant`}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>

@@ -12,7 +12,7 @@ export const useFetchedHouseholdDataByEstate = (
   const safeEstateId = estateId?.trim() ?? "";
 
   return useQuery({
-    queryKey: ["households", `${safeEstateId}`, searchTerm, page, pageSize],
+    queryKey: ["households", safeEstateId, page, pageSize, searchTerm],
     enabled: Boolean(safeEstateId),
     queryFn: async () => {
       const params = new URLSearchParams();

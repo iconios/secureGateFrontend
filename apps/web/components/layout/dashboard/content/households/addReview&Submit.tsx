@@ -5,6 +5,8 @@ import { Box, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import { useFormContext, useWatch } from "react-hook-form";
 import { CreateHouseholdFormInput, CreateHouseholdPayload } from "./types";
+import { useEffect } from "react";
+import { PrincipalResidentSkeleton } from "./skeletonPrincipalResidentReview";
 
 const SummaryItem = ({
   label,
@@ -87,7 +89,25 @@ const SummaryOtherTitle = ({ title }: { title: string }) => {
   );
 };
 
-export const AddReviewAndSubmit = () => {
+export const AddReviewAndSubmit = ({
+  fetchedResidents,
+  shouldFetchExistingResidents,
+  setShouldFetchExistingResidents,
+  isFetching,
+}: {
+  fetchedResidents:
+    | {
+        id: string;
+        fullName: string;
+        phone: string;
+        email: string;
+        photoUrl: string;
+      }[]
+    | [];
+  shouldFetchExistingResidents: boolean;
+  setShouldFetchExistingResidents: (v: boolean) => void;
+  isFetching: boolean;
+}) => {
   const { control: unitControl } = useFormContext<
     CreateHouseholdFormInput,
     unknown,
@@ -108,6 +128,67 @@ export const AddReviewAndSubmit = () => {
       control: unitControl,
       name: "households.0.members",
     }) ?? [];
+
+  useEffect(() => {
+    setShouldFetchExistingResidents(true);
+  }, [setShouldFetchExistingResidents]);
+
+  type MemberFormValue = (typeof members)[number];
+
+  const memeberEntity = (person: MemberFormValue) => {
+    if (person.mode === "link" && shouldFetchExistingResidents && !isFetching) {
+      return fetchedResidents.find((item) => item.id === person.personId);
+    }
+
+    return undefined;
+  };
+
+  const principalEntity = () => {
+    if (
+      principalResident.mode === "link" &&
+      shouldFetchExistingResidents &&
+      !isFetching
+    ) {
+      return fetchedResidents.find(
+        (person) => person.id === principalResident.personId,
+      );
+    }
+
+    return undefined;
+  };
+
+  const principalFullname = () => {
+    if (principalResident.mode === "create") return principalResident.fullName;
+
+    return principalEntity()?.fullName;
+  };
+
+  const memberFullname = (person: MemberFormValue) => {
+    if (person.mode === "create") return person.fullName;
+
+    return memeberEntity(person)?.fullName;
+  };
+
+  const principalEmail = () => {
+    if (principalResident.mode === "create") return principalResident.email;
+
+    const person = principalEntity();
+    return person?.email;
+  };
+
+  const principalPhone = () => {
+    if (principalResident.mode === "create") return principalResident.phone;
+
+    const person = principalEntity();
+    return person?.phone;
+  };
+
+  const principalPhotoUrl = () => {
+    if (principalResident.mode === "create") return principalResident.photoUrl;
+
+    const person = principalEntity();
+    return person?.photoUrl;
+  };
 
   return (
     <Box sx={{ paddingX: { xs: 1, md: 2 } }}>
@@ -209,54 +290,38 @@ export const AddReviewAndSubmit = () => {
               paddingX: 1,
             }}
           >
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Image
-                src={
-                  principalResident.mode === "create"
-                    ? principalResident.photoUrl
-                    : ""
-                }
-                alt={
-                  principalResident.mode === "create"
-                    ? principalResident.fullName
-                    : ""
-                }
-                width={45}
-                height={45}
-              />
-              <Box>
-                <SummaryItem
-                  label="principal resident"
-                  value={
-                    principalResident.mode === "create"
-                      ? principalResident.fullName
-                      : "Principal Resident"
-                  }
-                  primary
+            {isFetching ? (
+              <PrincipalResidentSkeleton />
+            ) : (
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  src={principalPhotoUrl() ?? ""}
+                  alt={principalFullname() ?? "Principal resident"}
+                  width={45}
+                  height={45}
                 />
-              </Box>
-            </Stack>
+                <Box>
+                  <SummaryItem
+                    label="principal resident"
+                    value={principalFullname() ?? "Principal resident"}
+                    primary
+                  />
+                </Box>
+              </Stack>
+            )}
             <Box>
               <SummaryItem
                 label="contact details"
-                value={
-                  principalResident.mode === "create"
-                    ? principalResident.email
-                    : "Principal Email"
-                }
-                optionalValue={
-                  principalResident.mode === "create"
-                    ? principalResident.phone
-                    : "Principal Phone"
-                }
+                value={principalEmail() ?? "Principal email"}
+                optionalValue={principalPhone() ?? "Principal phone"}
               />
             </Box>
           </Stack>
@@ -275,16 +340,28 @@ export const AddReviewAndSubmit = () => {
               <SummaryOtherTitle
                 title={`ADDITIONAL RESIDENTS (${members.length})`}
               />
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                  fontSize: { xs: 14, md: 16 },
-                  fontWeight: 400,
-                }}
-              >
-                Sarah James
-              </Typography>
+              {members.length > 0 &&
+                members.map((person, index) => {
+                  const keyId =
+                    person.mode === "link"
+                      ? person.personId
+                      : (person.photoUrl ?? `created-member-${index}`);
+
+                  return (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "text.secondary",
+                        fontSize: { xs: 14, md: 16 },
+                        fontWeight: 400,
+                        textAlign: "center",
+                      }}
+                      key={keyId}
+                    >
+                      {memberFullname(person) ?? "Member name"}
+                    </Typography>
+                  );
+                })}
             </Box>
             <Box>
               <SummaryOtherTitle title="VEHICLES (1)" />
@@ -294,6 +371,7 @@ export const AddReviewAndSubmit = () => {
                   color: "text.secondary",
                   fontSize: { xs: 14, md: 16 },
                   fontWeight: 400,
+                  textAlign: "center",
                 }}
               >
                 Comming soon

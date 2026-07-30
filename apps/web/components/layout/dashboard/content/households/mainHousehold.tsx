@@ -1,51 +1,82 @@
 "use client";
 
-// Main Household Page Component
-/*
-#Workflow Plan:
-1. User clicks household sidebar link
-2. Household page accepts estate id for its household to be fetched to display
-3. If the user provides no estate id or fetching the household data for the estate id returns no estate, 
-    the page redirects to the main overview page
-4. If the user provides an estate id and fetching the household data for the estate id returns household data even if zeros,
-    the page should display the zero household data
-    the page should also display the top bar to switch between estates if available. 
-*/
-
 import { useEffect, useState } from "react";
+import { Box } from "@mui/material";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+
 import { useFetchedHouseholdDataByEstate } from "../../../../../hooks/useFetchedHouseholdData";
+import { estateActions } from "../../../../../lib/features/estate/estateSlice";
+
 import { EmptyHousehold } from "./emptyHousehold";
 import { ErrorHouseholdsPage } from "./errorMainPage";
 import { LoadingHouseholdPage } from "./loadingMainPage";
-import { useRouter } from "next/navigation";
 import { HouseholdsHeader } from "./headerForHouseholds";
 import { HouseholdsTable } from "./householdsTable";
 import { HouseholdsFooter } from "./footerForHouseholds";
-import { Box } from "@mui/material";
 import MainTopBar from "../mainTopBar";
 
-export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
+type MainHouseholdComponentProps = {
+  estateId: string;
+};
+
+type HouseholdErrorCause = {
+  code?: string;
+  details?: string;
+};
+
+export const MainHouseholdComponent = ({
+  estateId,
+}: MainHouseholdComponentProps) => {
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  const [selectedEstateId, setSelectedEstateId] = useState(estateId);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  console.log("Initial estate id", estateId);
-  const [selectedEstateId, setSelectedEstateId] = useState<string>(estateId);
 
   useEffect(() => {
-    if (!searchTerm) return;
+    if (!estateId) {
+      router.replace("/dashboard");
+      return;
+    }
 
-    const delayDebounce = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
+    setSelectedEstateId(estateId);
+    setSearchTerm("");
+    setDebouncedSearchTerm("");
+  }, [estateId, router]);
+
+  useEffect(() => {
+    if (!selectedEstateId) {
+      return;
+    }
+
+    dispatch(estateActions.insertEstateId(selectedEstateId));
+  }, [dispatch, selectedEstateId]);
+
+  useEffect(() => {
+    const normalizedSearchTerm = searchTerm.trim();
+
+    if (!normalizedSearchTerm) {
+      setDebouncedSearchTerm("");
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchTerm(normalizedSearchTerm);
     }, 500);
 
-    return () => clearTimeout(delayDebounce);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [searchTerm]);
 
-  const { isError, error, data, isPending, isLoading, isFetching, refetch } =
+  const { isError, error, data, isPending, refetch, isFetching } =
     useFetchedHouseholdDataByEstate(
       selectedEstateId,
-      "",
-      "",
+      "1",
+      "10",
       debouncedSearchTerm,
     );
 
@@ -55,88 +86,112 @@ export const MainHouseholdComponent = ({ estateId }: { estateId: string }) => {
     }
   }, [data, router]);
 
-  if (isError) {
-    const errorMessage =
-      error instanceof Error ? error.message : "An unexpected error occurred";
-    const errorCode =
-      error instanceof Error &&
-      error.cause &&
-      (error.cause as any).code !== undefined
-        ? (error.cause as any).code
-        : "UNKNOWN_CODE";
-    const errorRequestId =
-      error instanceof Error &&
-      error.cause &&
-      (error.cause as any).details !== undefined
-        ? (error.cause as any).details
-        : "NOT_AVAILABLE";
+  const handleSelectedEstateIdChange = (newEstateId: string) => {
+    if (!newEstateId || newEstateId === selectedEstateId) {
+      return;
+    }
 
-    console.log("Message", errorMessage);
-    console.log("code", errorCode);
-    console.log("RequestId", errorRequestId);
+    setSearchTerm("");
+    setDebouncedSearchTerm("");
+    setSelectedEstateId(newEstateId);
+
+    router.replace(
+      `/dashboard/households?estateId=${encodeURIComponent(newEstateId)}`,
+    );
+  };
+
+  if (!estateId) {
+    return null;
+  }
+
+  if (isError) {
+    const cause =
+      error instanceof Error &&
+      typeof error.cause === "object" &&
+      error.cause !== null
+        ? (error.cause as HouseholdErrorCause)
+        : undefined;
+
     return (
       <ErrorHouseholdsPage
-        message={errorMessage}
-        code={errorCode}
-        requestId={errorRequestId}
-        refetch={() => refetch()}
+        message={
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred"
+        }
+        code={cause?.code ?? "UNKNOWN_CODE"}
+        requestId={cause?.details ?? "NOT_AVAILABLE"}
+        refetch={() => {
+          void refetch();
+        }}
       />
     );
   }
 
-  if (isPending || isLoading || isFetching) {
+  // Initial loading only.
+  if (isPending) {
     return <LoadingHouseholdPage />;
   }
 
-  // fetching the household data for the estate id returns no estate,
-  //  the page redirects to the main overview page
-  if (data === null) {
+  if (!data) {
     return null;
   }
 
-  const allUserEstates = data.allEstates;
+  const estateHasNoHouseholds = data.summary.householdsTotal === 0;
 
-  if (data.households.length === 0) {
+  if (estateHasNoHouseholds) {
     return (
-      <>
+      <Box
+        sx={{
+          width: "100%",
+          px: { xs: 2, md: 3 },
+          pt: { xs: 2, md: 3 },
+        }}
+      >
         <MainTopBar
-          estates={allUserEstates}
+          estates={data.allEstates}
           selectedEstateId={selectedEstateId}
-          changeSelectedEstate={setSelectedEstateId}
+          changeSelectedEstate={handleSelectedEstateIdChange}
         />
-        <EmptyHousehold estateName={data?.estateName ?? "Unknown"} />
-      </>
+
+        <EmptyHousehold estateName={data.estateName ?? "Unknown"} />
+      </Box>
     );
   }
 
   return (
     <Box
       sx={{
+        width: "100%",
         px: { xs: 2, md: 3 },
         pt: { xs: 2, md: 3 },
-        width: "100%",
       }}
     >
       <MainTopBar
-        estates={allUserEstates}
+        estates={data.allEstates}
         selectedEstateId={selectedEstateId}
-        changeSelectedEstate={setSelectedEstateId}
+        changeSelectedEstate={handleSelectedEstateIdChange}
       />
-      <HouseholdsHeader estateName={data.estateName} />
-      <Box
-        sx={{
-          mb: { xs: 2, md: 4 },
-        }}
-      >
+
+      <HouseholdsHeader
+        estateName={data.estateName}
+        totalHouseholds={data.summary.householdsTotal}
+        totalMembers={data.summary.membersTotal}
+        totalAssistants={data.summary.assistantsTotal}
+      />
+
+      <Box sx={{ mb: { xs: 2, md: 4 } }}>
         <HouseholdsTable
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          isFetching={isFetching}
           householdsTableData={{
             households: data.households,
             pagination: data.pagination,
           }}
         />
       </Box>
+
       <HouseholdsFooter />
     </Box>
   );

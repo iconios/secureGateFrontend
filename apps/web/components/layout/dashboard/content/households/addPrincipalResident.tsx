@@ -20,7 +20,7 @@ import {
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { CreateHouseholdFormInput, CreateHouseholdPayload } from "./types";
 import useAuthCheck from "../../../../../hooks/useAuthCheck";
-import { SyntheticEvent, useEffect, useState } from "react";
+import { SyntheticEvent, useEffect } from "react";
 import {
   CheckOutlined,
   AddAPhotoOutlined,
@@ -33,12 +33,41 @@ import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { useGetAllNonPrincipalsByEstate } from "../../../../../hooks/useGetAllNonPrincipalsByEstate";
 
 export const AddPrincipalResident = ({
   photoPreviewUrl,
   setPhotoPreviewUrl,
+  searchTerm,
+  setSearchTerm,
+  fetchedResidents,
+  isError,
+  error,
+  isSuccess,
+  isLoading,
+  isFetching,
+  refetch,
+  setShouldFetchExistingResidents,
+  shouldFetchExistingResidents,
 }: {
+  searchTerm: string;
+  setSearchTerm: (v: string) => void;
+  fetchedResidents:
+    | {
+        id: string;
+        fullName: string;
+        phone: string;
+        email: string;
+        photoUrl: string;
+      }[]
+    | [];
+  isError: boolean;
+  error: Error | null;
+  isSuccess: boolean;
+  isLoading: boolean;
+  isFetching: boolean;
+  refetch: () => void;
+  setShouldFetchExistingResidents: (v: boolean) => void;
+  shouldFetchExistingResidents: boolean;
   photoPreviewUrl: string;
   setPhotoPreviewUrl: (v: string) => void;
 }) => {
@@ -46,8 +75,6 @@ export const AddPrincipalResident = ({
 
   // Other local state variables
   const estateId = useSelector((state: RootState) => state.estate.estateId);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debounceSearchTerm, setDebounceSearchTerm] = useState("");
 
   // React Hook Form context
   const { setValue, control, clearErrors } = useFormContext<
@@ -109,28 +136,9 @@ export const AddPrincipalResident = ({
       name: "households.0.principalResident.personId",
     }) ?? "";
 
-  const shouldFetchExistingResidents = tabValue === 1 && !!estateId;
-  const { isError, error, data, isSuccess, isLoading, isFetching, refetch } =
-    useGetAllNonPrincipalsByEstate(
-      estateId,
-      "1",
-      "20",
-      debounceSearchTerm,
-      shouldFetchExistingResidents,
-    );
-  const fetchedResidents =
-    data && "nonPrincipals" in data ? data.nonPrincipals : [];
-  console.log({
-    shouldFetchExistingResidents,
-    estateId,
-    isLoading,
-    isFetching,
-    isSuccess,
-    isError,
-    rawData: data,
-    fetchedResidents,
-    fetchedResidentsLength: fetchedResidents.length,
-  });
+  useEffect(() => {
+    setShouldFetchExistingResidents(tabValue === 1 && !!estateId);
+  }, [tabValue, estateId, setShouldFetchExistingResidents]);
 
   // Get user id
   const user = useSelector((state: unknown) => (state as RootState).auth.user);
@@ -141,14 +149,6 @@ export const AddPrincipalResident = ({
     error: uploadError,
     loading: uploadLoading,
   } = useImageUpload({ userId });
-
-  useEffect(() => {
-    const delayDebounceFunction = setTimeout(() => {
-      setDebounceSearchTerm(searchTerm.trim());
-    }, 500);
-
-    return () => clearTimeout(delayDebounceFunction);
-  }, [searchTerm]);
 
   return (
     <Box>
@@ -601,7 +601,7 @@ export const AddPrincipalResident = ({
 
           {isError && (
             <Box>
-              <Typography>{error.message}</Typography>
+              <Typography>{error?.message}</Typography>
               <Button variant="contained" onClick={() => refetch()}>
                 Refetch
               </Button>

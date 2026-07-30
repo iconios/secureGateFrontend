@@ -46,6 +46,7 @@ export const useGetAllNonPrincipalsByEstate = (
         });
       }
 
+      console.log("Non-principals", result.data);
       return result.data as GetNonPrincipalsByEstateServerResponse["data"];
     },
     staleTime: 5 * 60 * 1000,

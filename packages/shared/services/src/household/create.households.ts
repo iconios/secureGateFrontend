@@ -1,4 +1,4 @@
-// Get All Non Principal Residents By Estate
+// Fetch Households By Estate
 /*
 #Plan:
 1. Get and validate the necessary data
@@ -7,19 +7,16 @@
 */
 
 import { errorResponseHelper } from "../util/errorResponseHelper";
-import { GetNonPrincipalsByEstateServerResponse } from "./types";
+import { CreateHouseholdInput, CreateHouseholdServerResponse } from "./types";
 
-export const getAllNonPrincipalsByEstate = async (
+export const CreateHouseholdsService = async (
   token: string,
   apiUrl: string,
-  estateId: string,
-  page?: string,
-  pageSize?: string,
-  searchTerm?: string,
+  createHouseholdData: CreateHouseholdInput,
 ) => {
   try {
     // 1. Get and validate the necessary data
-    if (!token || !apiUrl || !estateId) {
+    if (!token || !apiUrl) {
       return {
         success: false,
         message: "Required arguments are missing. Please make available",
@@ -35,43 +32,35 @@ export const getAllNonPrincipalsByEstate = async (
     }
 
     // 2. Pass the data to the API
-    const url = new URL(`${apiUrl}/residents/non-principals/by-estate`);
-    url.searchParams.set("estateId", encodeURIComponent(estateId));
-    if (page) {
-      url.searchParams.set("page", page);
-    }
-    if (pageSize) {
-      url.searchParams.set("pageSize", pageSize);
-    }
-    if (searchTerm) {
-      url.searchParams.set("searchTerm", searchTerm);
-    }
+    const url = new URL(`${apiUrl}/households/create`);
+
     const response = await fetch(url.toString(), {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      cache: "no-store",
+      body: JSON.stringify(createHouseholdData),
     });
 
-    let result: GetNonPrincipalsByEstateServerResponse | null = null;
+    let result: CreateHouseholdServerResponse | null = null;
 
     try {
       result = await response.json();
+      console.log("Create households data", result);
     } catch {
       return errorResponseHelper(
-        "Invalid server response while fetching residents data.",
+        "Invalid server response while creating households.",
         "INVALID_JSON_RESPONSE",
         "The backend did not return valid JSON.",
       );
     }
 
-    if (!response.ok) {
+    if (!result?.success) {
       return errorResponseHelper(
-        "Failed to fetch residents data.",
-        "FETCH_FAILED",
-        result?.message ?? "Failed to fetch residents data.",
+        result?.message ?? "Failed to create households.",
+        "HOUSEHOLDS_CREATION_FAILED",
+        result?.message ?? "Failed to create households.",
       );
     }
 
@@ -79,9 +68,9 @@ export const getAllNonPrincipalsByEstate = async (
     return result;
   } catch (error: any) {
     return errorResponseHelper(
-      error?.message ?? "Unknown error while fetching residents data.",
+      error?.message ?? "Unknown error while creating households.",
       "UNKNOWN_ERROR",
-      "Unknown error while fetching residents data.",
+      "Unknown error while creating households.",
     );
   }
 };

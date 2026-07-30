@@ -1,4 +1,6 @@
-import { useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import { HouseholdUnitDetailsProvision } from "./addUnitDetails";
 import {
   Box,
@@ -12,7 +14,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../../../lib/store";
 import {
   ArrowForwardOutlined,
   CancelOutlined,
@@ -30,6 +31,10 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddMemberResident } from "./addMemberResident";
 import { AddReviewAndSubmit } from "./addReview&Submit";
+import { useCreateHouseholds } from "../../../../../hooks/useCreateHouseholds";
+import { showToast } from "../../../../../utils/toast";
+import { RootState } from "../../../../../lib/store";
+import { useGetAllNonPrincipalsByEstate } from "../../../../../hooks/useGetAllNonPrincipalsByEstate";
 
 enum HouseholdWizardSteps {
   UnitDetails = 0,
@@ -48,7 +53,22 @@ export const AddHouseholdWizardDialog = ({
   // Local state variables
   const [activeStep, setActiveStep] = useState(0);
   const [customOptions, setCustomOptions] = useState<string[]>([]);
-  const estateId = useSelector((state: RootState) => state.estate.estateId);
+  const estateId = useSelector((state) => (state as RootState).estate.estateId);
+  console.log("estate id", estateId);
+  const { isError, error, mutateAsync, isPending, reset } =
+    useCreateHouseholds(estateId);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debounceSearchTerm, setDebounceSearchTerm] = useState("");
+  const [shouldFetchExistingResidents, setShouldFetchExistingResidents] =
+    useState(false);
+
+  useEffect(() => {
+    const delayDebounceFunction = setTimeout(() => {
+      setDebounceSearchTerm(searchTerm.trim());
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFunction);
+  }, [searchTerm]);
 
   // Local state for image preview URL and check authentication state
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string>("");
@@ -90,20 +110,49 @@ export const AddHouseholdWizardDialog = ({
     },
   });
 
-  const {
-    handleSubmit,
-    trigger,
-    formState: { isValid },
-  } = methods;
+  const { handleSubmit, trigger } = methods;
 
   // Wizard handlers
   const handleClose = () => {
-    setActiveStep(0);
+    if (isPending) {
+      return;
+    }
+
+    methods.reset();
+    reset();
+
+    setActiveStep(HouseholdWizardSteps.UnitDetails);
+    setCustomOptions([]);
+    setPhotoPreviewUrl("");
+
     onClose();
   };
 
+  // Handle fetch for non-principals
+  const {
+    isError: nonPrincipalIsError,
+    error: nonPrincipalError,
+    data: nonPrincipalData,
+    isSuccess: nonPrincipalIsSuccess,
+    isLoading: nonPrincipalIsLoading,
+    isFetching: nonPrincipalIsFetching,
+    refetch: nonPrincipalRefetch,
+  } = useGetAllNonPrincipalsByEstate(
+    estateId,
+    "1",
+    "20",
+    debounceSearchTerm,
+    shouldFetchExistingResidents,
+  );
+  const fetchedResidents =
+    nonPrincipalData && "nonPrincipals" in nonPrincipalData
+      ? nonPrincipalData.nonPrincipals
+      : [];
+
   const handleNext = async () => {
     if (activeStep === HouseholdWizardSteps.Review) {
+      setSearchTerm("");
+      setDebounceSearchTerm("");
       await handleSubmit(handleFormSubmit)();
       return;
     }
@@ -129,10 +178,14 @@ export const AddHouseholdWizardDialog = ({
     const isStepValid = await trigger(fieldsToValidate);
 
     if (!isStepValid) {
+      setSearchTerm("");
+      setDebounceSearchTerm("");
       return;
     }
 
     setActiveStep((prev) => prev + 1);
+    setSearchTerm("");
+    setDebounceSearchTerm("");
   };
 
   const handleBack = () => {
@@ -140,6 +193,8 @@ export const AddHouseholdWizardDialog = ({
       return;
     } else {
       setActiveStep((prev) => prev - 1);
+      setSearchTerm("");
+      setDebounceSearchTerm("");
     }
   };
 
@@ -159,12 +214,44 @@ export const AddHouseholdWizardDialog = ({
           <AddPrincipalResident
             photoPreviewUrl={photoPreviewUrl}
             setPhotoPreviewUrl={setPhotoPreviewUrl}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            fetchedResidents={fetchedResidents}
+            isError={nonPrincipalIsError}
+            error={nonPrincipalError}
+            isSuccess={nonPrincipalIsSuccess}
+            isLoading={nonPrincipalIsLoading}
+            isFetching={nonPrincipalIsFetching}
+            refetch={nonPrincipalRefetch}
+            setShouldFetchExistingResidents={setShouldFetchExistingResidents}
+            shouldFetchExistingResidents={shouldFetchExistingResidents}
           />
         );
       case 2:
-        return <AddMemberResident />;
+        return (
+          <AddMemberResident
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            fetchedResidents={fetchedResidents}
+            isError={nonPrincipalIsError}
+            error={nonPrincipalError}
+            isSuccess={nonPrincipalIsSuccess}
+            isLoading={nonPrincipalIsLoading}
+            isFetching={nonPrincipalIsFetching}
+            refetch={nonPrincipalRefetch}
+            setShouldFetchExistingResidents={setShouldFetchExistingResidents}
+            shouldFetchExistingResidents={shouldFetchExistingResidents}
+          />
+        );
       case 3:
-        return <AddReviewAndSubmit />;
+        return (
+          <AddReviewAndSubmit
+            fetchedResidents={fetchedResidents}
+            shouldFetchExistingResidents={shouldFetchExistingResidents}
+            setShouldFetchExistingResidents={setShouldFetchExistingResidents}
+            isFetching={nonPrincipalIsFetching}
+          />
+        );
       default:
         return <Typography>Unknown Step</Typography>;
     }
@@ -172,7 +259,33 @@ export const AddHouseholdWizardDialog = ({
 
   // Handler for form submit
   const handleFormSubmit = async (data: CreateHouseholdPayload) => {
-    console.log(data);
+    try {
+      await mutateAsync(data);
+
+      methods.reset();
+      setActiveStep(HouseholdWizardSteps.UnitDetails);
+      setCustomOptions([]);
+      setPhotoPreviewUrl("");
+
+      onClose();
+    } catch {
+      // The error is available through createHouseholds.error.
+      // Keep the dialog open so it can be displayed to the user.
+    }
+  };
+
+  if (isError) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Error encountered during household creation";
+    showToast.error(errorMessage);
+  }
+
+  const submitButtonLabel = () => {
+    if (isPending) return "Submitting...";
+    if (activeStep === HouseholdWizardSteps.Review) return "Submit";
+    return "Next";
   };
 
   return (
@@ -216,48 +329,70 @@ export const AddHouseholdWizardDialog = ({
             </IconButton>
           </Stack>
         </DialogTitle>
-        <DialogContent dividers={true}>
-          {/** Household creation steps */}
-          <FormProvider {...methods}>
-            <HouseholdCreationSteps step={activeStep} />
-            <Box sx={{ minHeight: "200px" }} component="form">
-              {renderStepContent(activeStep)}
-            </Box>
-          </FormProvider>
-        </DialogContent>
-        <DialogActions
-          sx={{
-            justifyContent: "space-between",
-            alignItems: "center",
-            display: "flex",
-            px: 3,
-          }}
-        >
-          <Button
-            onClick={handleClose}
-            variant="outlined"
-            startIcon={<CancelOutlined />}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={handleBack}
-            sx={{
-              display: activeStep === 0 ? "none" : "block",
+        <FormProvider {...methods}>
+          <Box
+            component="form"
+            noValidate
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleNext();
             }}
           >
-            Back
-          </Button>
-          <Button
-            onClick={handleNext}
-            variant="contained"
-            color="primary"
-            endIcon={activeStep === 3 ? <PostAdd /> : <ArrowForwardOutlined />}
-          >
-            {activeStep === 3 ? "Submit" : "Next"}
-          </Button>
-        </DialogActions>
+            <DialogContent dividers={true}>
+              {/** Household creation steps */}
+              <HouseholdCreationSteps step={activeStep} />
+              <Box sx={{ minHeight: "200px" }}>
+                {renderStepContent(activeStep)}
+              </Box>
+            </DialogContent>
+            <DialogActions
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center",
+                display: "flex",
+                px: 3,
+              }}
+            >
+              <Button
+                type="button"
+                onClick={handleClose}
+                variant="outlined"
+                startIcon={<CancelOutlined />}
+                disabled={isPending}
+              >
+                Cancel
+              </Button>
+
+              <Stack direction="row" spacing={1}>
+                {activeStep !== HouseholdWizardSteps.UnitDetails && (
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    onClick={handleBack}
+                    disabled={isPending}
+                  >
+                    Back
+                  </Button>
+                )}
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={isPending}
+                  endIcon={
+                    activeStep === HouseholdWizardSteps.Review ? (
+                      <PostAdd />
+                    ) : (
+                      <ArrowForwardOutlined />
+                    )
+                  }
+                >
+                  {submitButtonLabel()}
+                </Button>
+              </Stack>
+            </DialogActions>
+          </Box>
+        </FormProvider>
       </Dialog>
     </Box>
   );

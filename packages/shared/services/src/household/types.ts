@@ -49,3 +49,62 @@ export type FetchHouseholdsByEstateServerResponse = {
     timestamp: string;
   };
 };
+
+export type CreateHouseholdInput = {
+  estateId: string;
+  households: {
+    house: {
+      unitNumber: string;
+      blockOrStreet?: string;
+    };
+    principalResident: {
+      mode: "link" | "create";
+      personId?: string;
+      fullName?: string;
+      email?: string;
+      phone?: string;
+      gender?: "male" | "female";
+      photoUrl?: string;
+      dateOfBirth?: string;
+    };
+    members: {
+      mode: "link" | "create";
+      personId?: string;
+      fullName?: string;
+      dateOfBirth?: string;
+      email?: string;
+      phone?: string;
+      photoUrl?: string;
+      gender?: "male" | "female";
+    }[];
+  }[];
+};
+
+export type CreateHouseholdServerResponse = {
+  success: boolean;
+  message: string;
+  data:
+    | {}
+    | {
+        householdId: string;
+        unitNumber: string;
+        code: string;
+        principalResident: {
+          personId: string;
+          code?: string;
+        };
+        members: {
+          personId: string;
+          code?: string;
+        }[];
+      }[];
+  error:
+    | {}
+    | {
+        code: string;
+        details: any;
+      };
+  metadata: {
+    timestamp: string;
+  };
+};

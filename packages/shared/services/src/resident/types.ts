@@ -8,6 +8,8 @@ export type GetNonPrincipalsByEstateServerResponse = {
           id: string;
           fullName: string;
           phone: string;
+          email: string;
+          photoUrl: string;
         }[];
         pagination: {
           page: number;
