@@ -1,4 +1,9 @@
-import { Close, SearchOutlined, CheckOutlined } from "@mui/icons-material";
+import {
+  Close,
+  SearchOutlined,
+  CheckOutlined,
+  Delete,
+} from "@mui/icons-material";
 import {
   Box,
   Stack,
@@ -16,7 +21,6 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
-  Modal,
   Drawer,
 } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -34,6 +38,7 @@ import { useGetAllNonPrincipalResidentsByHousehold } from "../../../../../hooks/
 import { ChangePrincipalResident } from "./changePrincipalResident";
 import { useSwapPrincipalResident } from "../../../../../hooks/useSwapPrincipalResident";
 import { householdActions } from "../../../../../lib/features/household/householdSlice";
+import { DeleteHouseholdRecord } from "./deleteHousehold";
 
 const UnitInfo = ({ label, value }: { label: string; value: string }) => {
   return (
@@ -94,10 +99,12 @@ export const EditHouseholdDetails = ({
   activeTab,
   setActiveTab,
   isPending,
+  isDirty,
 }: {
   photoPreviewUrl: string;
   activeTab: number;
   isPending: boolean;
+  isDirty: boolean;
   setPhotoPreviewUrl: (v: string) => void;
   handleClose: () => void;
   setActiveTab: (v: number) => void;
@@ -113,6 +120,7 @@ export const EditHouseholdDetails = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const { insertEditHouseholdData } = householdActions;
+  const [openDelete, setOpenDelete] = useState(false);
 
   //Get estate id, house code and block/street details
   const estateId =
@@ -375,8 +383,13 @@ export const EditHouseholdDetails = ({
                     spacing={1}
                     sx={{
                       padding: 1,
-                      backgroundColor: "background.paper",
+                      backgroundColor: "#DADEDF",
                       borderRadius: 2,
+                      border: "1px solid",
+                      borderColor: "#DADEDF",
+                      display: "flex",
+                      justifyContent: "flex-start",
+                      alignItems: "center",
                     }}
                   >
                     {photoUrl ? (
@@ -829,6 +842,15 @@ export const EditHouseholdDetails = ({
           <Button
             type="button"
             variant="outlined"
+            startIcon={<Delete color="error" />}
+            onClick={() => {setOpenDelete(true)}}
+            sx={{ flexShrink: 0, borderColor: "red", color: "red" }}
+          >
+            Delete
+          </Button>
+          <Button
+            type="button"
+            variant="outlined"
             disabled={isPending}
             onClick={handleClose}
             sx={{ flexShrink: 0 }}
@@ -840,7 +862,7 @@ export const EditHouseholdDetails = ({
             type="submit"
             variant="contained"
             sx={{ flex: 1 }}
-            disabled={isPending}
+            disabled={isPending || !isDirty}
           >
             Save Changes
           </Button>
@@ -930,8 +952,8 @@ export const EditHouseholdDetails = ({
                 flexDirection: "column",
                 overflow: "hidden",
                 zIndex: (theme) => theme.zIndex.appBar + 1,
-                paddingTop: 10,
-                paddingX: 2
+                paddingTop: 12,
+                paddingX: 2,
               },
             },
           }}
@@ -949,7 +971,7 @@ export const EditHouseholdDetails = ({
           >
             <Box
               sx={{
-                marginBottom: 3
+                marginBottom: 3,
               }}
             >
               <Typography
@@ -975,12 +997,15 @@ export const EditHouseholdDetails = ({
               </Typography>
             </Box>
             <ChangePrincipalResident {...changePrincipalContent} />
-            <Stack direction="row" sx={{
-              marginTop: 3,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}>
+            <Stack
+              direction="row"
+              sx={{
+                marginTop: 3,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <Button
                 variant="outlined"
                 color="primary"
@@ -1000,6 +1025,12 @@ export const EditHouseholdDetails = ({
           </Box>
         </Drawer>
       )}
+
+      {/* Delete Household Dialog Box */}
+      <DeleteHouseholdRecord
+        open={openDelete}
+        setOpen={(setOpenDelete)}
+      />
     </>
   );
 };

@@ -36,7 +36,7 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeTab, setActiveTab] = useState(0);
-  const estateId = useSelector((state: RootState) => state.estate.estateId);
+  const estateId = useSelector((state: RootState) => (state as RootState).estate.estateId);
   const queryClient = useQueryClient();
 
   const handleClose = () => {
@@ -65,7 +65,7 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
   const {
     reset,
     handleSubmit,
-    formState: { isSubmitting, dirtyFields },
+    formState: { isSubmitting, dirtyFields, isDirty },
   } = methods;
   useEffect(() => {
     if (!open) return;
@@ -211,7 +211,7 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
       Object.keys(householdChanges).length === 0 &&
       Object.keys(principalChanges).length === 0
     ) {
-      showToast.error("No changes were made");
+      // showToast.error("No changes were made");
       return;
     }
 
@@ -225,6 +225,7 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
     activeTab,
     setActiveTab,
     isPending: mutation.isPending || isSubmitting,
+    isDirty
   };
 
   return (
