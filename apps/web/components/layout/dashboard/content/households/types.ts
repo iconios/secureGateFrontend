@@ -23,6 +23,8 @@ export type HouseholdsTableData = {
           photoUrl: string;
           phone: string;
           email: string;
+          gender: "male" | "female";
+          dateOfBirth: string;
         } | null;
         memberCount: number;
         assistantCount: number;
@@ -104,6 +106,25 @@ export const CreatedResidentSchema = z.object({
 
 export type CreatedResidentType = z.infer<typeof CreatedResidentSchema>;
 
+export const EditPrincipalSchema = CreatedResidentSchema.omit({
+  mode: true,
+  gender: true,
+}).extend({
+  gender: z.enum(["male", "female"], { message: "Please select a gender" }),
+  unitNumber: z.string().trim().min(1, "Minimum of one character is required"),
+  blockOrStreet: z
+    .string()
+    .trim()
+    .min(1, "Minimum of one character is required"),
+  principalPersonId: z
+    .string()
+    .trim()
+    .min(1, "Minimum of one character is required"),
+  householdId: z.string().trim().min(1, "Minimum of one character is required"),
+});
+
+export type EditPrincipalType = z.infer<typeof EditPrincipalSchema>;
+
 export const LinkedResidentSchema = z.object({
   mode: z.literal("link"),
   personId: z.string().trim().min(1, "Select an existing resident"),
@@ -140,3 +161,55 @@ export type CreateHouseholdFormInput = z.input<
 export type CreateHouseholdPayload = z.output<
   typeof CreateHouseholdInputSchema
 >;
+
+export type OpenHandleProps = {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+};
+
+export type MainEditHouseholdProps = {
+  householdId: string;
+  principalResidentId: string;
+  unitNumber: string;
+  blockOrStreet: string;
+  photoUrl: string;
+  fullName: string;
+  gender: "male" | "female";
+  dateOfBirth: string;
+  phone: string;
+  email: string;
+  houseCode: string;
+};
+
+export type UpdateHouseholdAndPrincipalApiSuccess = {
+  success: boolean;
+  message: string;
+  data: null | {
+    household: {
+      id: string;
+      createdAt: string;
+      updatedAt: string | null;
+      code: string;
+      estateId: string;
+      blockOrStreet: string | null;
+      unitNumber: string;
+    };
+    principal: {
+      id: string;
+      createdAt: string;
+      updatedAt: string | null;
+      fullName: string;
+      gender: "male" | "female" | "unknown";
+      dateOfBirth: string | null;
+      photoUrl: string | null;
+      phone: string;
+      estateId: string;
+      email: string;
+    };
+  };
+};
+
+export type SwapPrincipalResidentType = {
+  oldPrincipalId: string;
+  newPrincipalId: string;
+};

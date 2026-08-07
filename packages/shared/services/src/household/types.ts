@@ -26,6 +26,8 @@ export type FetchHouseholdsByEstateServerResponse = {
             photoUrl: string;
             phone: string;
             email: string;
+            gender: string;
+            dateOfBirth: string;
           } | null;
           memberCount: number;
           assistantCount: number;
@@ -104,6 +106,83 @@ export type CreateHouseholdServerResponse = {
         code: string;
         details: any;
       };
+  metadata: {
+    timestamp: string;
+  };
+};
+
+export type UpdateHouseholdAndPrincipalType = {
+  household:
+    | {
+        unitNumber?: string;
+        blockOrStreet?: string;
+      }
+    | undefined;
+  principal:
+    | {
+        fullName?: string;
+        email?: string;
+        phone?: string;
+        gender?: "male" | "female";
+        photoUrl?: string;
+        dateOfBirth?: Date;
+      }
+    | undefined;
+};
+
+export type UpdateHouseholdAndPrincipalServerResponse = {
+  success: boolean;
+  message: string;
+  data: null | {
+    household: {
+      id: string;
+      createdAt: string;
+      updatedAt: string | null;
+      code: string;
+      estateId: string;
+      blockOrStreet: string | null;
+      unitNumber: string;
+    };
+    principal: {
+      id: string;
+      createdAt: string;
+      updatedAt: string | null;
+      fullName: string;
+      gender: "male" | "female" | "unknown";
+      dateOfBirth: string | null;
+      photoUrl: string | null;
+      phone: string;
+      estateId: string;
+      email: string;
+    };
+  };
+  error: null | {
+    code: string;
+    details: string;
+  };
+  metadata: {
+    timestamp: string;
+  };
+};
+
+export type GetNonPrincipalsByHouseholdServerResponse = {
+  success: boolean;
+  message: string;
+  data: null | {
+    count: number;
+    nonPrincipalResidents: {
+      id: string;
+      personId: string;
+      fullName: string;
+      email: string;
+      phone: string;
+      photoUrl: string;
+    }[];
+  };
+  error: null | {
+    code: string;
+    details: string;
+  };
   metadata: {
     timestamp: string;
   };

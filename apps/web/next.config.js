@@ -7,6 +7,11 @@ const nextConfig = {
         hostname: "xsyjdelcgyjgdaffucru.supabase.co",
         pathname: "/storage/v1/object/public/securegate-logos/**",
       },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
+        pathname: '/**',
+      },
     ],
   },
 };

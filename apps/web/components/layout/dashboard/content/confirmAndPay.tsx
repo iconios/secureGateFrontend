@@ -6,7 +6,6 @@ import {
   ArrowForwardOutlined,
   BusinessOutlined,
   CheckCircleOutlined,
-  Error,
   HomeWorkOutlined,
   LockOutlined,
   VpnKeyOutlined,
@@ -24,7 +23,6 @@ import {
 import { alpha } from "@mui/material/styles";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../lib/store";
-import { showToast } from "../../../../utils/toast";
 import { ConfirmAndPayResult } from "./estate.types";
 
 type ConfirmAndPayProps = {

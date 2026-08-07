@@ -15,10 +15,14 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
-import { HouseholdsTableData } from "./types";
+import { HouseholdsTableData, MainEditHouseholdProps } from "./types";
 import { EmptyHouseholdTable } from "./emptyTable";
 import { SearchOutlined } from "@mui/icons-material";
 import { HouseholdTableSkeleton } from "./skeletonHouseholdsTable";
+import { useState } from "react";
+import { EditHousehold } from "./editHousehold";
+import { useDispatch } from "react-redux";
+import { householdActions } from "../../../../../lib/features/household/householdSlice";
 
 export const HouseholdsTable = ({
   householdsTableData,
@@ -32,6 +36,19 @@ export const HouseholdsTable = ({
   isFetching: boolean;
 }) => {
   const data = householdsTableData?.households;
+  const [editOpen, setEditOpen] = useState(false);
+  const dispatch = useDispatch();
+  const { insertEditHouseholdData, clearHouseholdData } = householdActions;
+
+  const handleEditHousehold = (data: MainEditHouseholdProps) => {
+    dispatch(insertEditHouseholdData(data));
+    setEditOpen(true);
+  };
+
+  const handleEditClose = () => {
+    dispatch(clearHouseholdData());
+    setEditOpen(false);
+  };
 
   if (data === null) {
     return <EmptyHouseholdTable />;
@@ -98,7 +115,28 @@ export const HouseholdsTable = ({
                 <HouseholdTableSkeleton />
               ) : (
                 data.map((row) => (
-                  <TableRow key={row.id} hover>
+                  <TableRow
+                    key={row.id}
+                    hover
+                    onClick={() => {
+                      if (!row.principalResident) return;
+
+                      handleEditHousehold({
+                        householdId: row.id,
+                        principalResidentId:
+                          row.principalResident.residentId ?? "",
+                        unitNumber: row.unitNumber,
+                        blockOrStreet: row.blockOrStreet ?? "",
+                        photoUrl: row.principalResident.photoUrl,
+                        fullName: row.principalResident.fullName ?? "",
+                        gender: row.principalResident.gender,
+                        dateOfBirth: row.principalResident.dateOfBirth,
+                        phone: row.principalResident.phone,
+                        email: row.principalResident.email,
+                        houseCode: row.code,
+                      });
+                    }}
+                  >
                     <TableCell>
                       <Typography
                         sx={{ fontSize: { xs: 12, md: 16 }, fontWeight: 700 }}
@@ -153,6 +191,9 @@ export const HouseholdsTable = ({
           </Table>
         </TableContainer>
       </Stack>
+
+      {/* Edit household UI */}
+      <EditHousehold open={editOpen} setOpen={handleEditClose} />
     </Paper>
   );
 };

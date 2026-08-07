@@ -15,6 +15,7 @@ import { HouseholdsHeader } from "./headerForHouseholds";
 import { HouseholdsTable } from "./householdsTable";
 import { HouseholdsFooter } from "./footerForHouseholds";
 import MainTopBar from "../mainTopBar";
+import { HouseholdsTableData } from "./types";
 
 type MainHouseholdComponentProps = {
   estateId: string;
@@ -178,6 +179,7 @@ export const MainHouseholdComponent = ({
         totalHouseholds={data.summary.householdsTotal}
         totalMembers={data.summary.membersTotal}
         totalAssistants={data.summary.assistantsTotal}
+        isFetching={isFetching}
       />
 
       <Box sx={{ mb: { xs: 2, md: 4 } }}>
@@ -186,7 +188,7 @@ export const MainHouseholdComponent = ({
           setSearchTerm={setSearchTerm}
           isFetching={isFetching}
           householdsTableData={{
-            households: data.households,
+            households: data.households as HouseholdsTableData["households"],
             pagination: data.pagination,
           }}
         />
