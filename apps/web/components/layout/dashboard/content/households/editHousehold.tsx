@@ -36,7 +36,9 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeTab, setActiveTab] = useState(0);
-  const estateId = useSelector((state: RootState) => (state as RootState).estate.estateId);
+  const estateId = useSelector(
+    (state: RootState) => (state as RootState).estate.estateId,
+  );
   const queryClient = useQueryClient();
 
   const handleClose = () => {
@@ -225,7 +227,7 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
     activeTab,
     setActiveTab,
     isPending: mutation.isPending || isSubmitting,
-    isDirty
+    isDirty,
   };
 
   return (

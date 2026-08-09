@@ -74,18 +74,6 @@ export const useSwapPrincipalResident = (
 
       return result.data;
     },
-
-    //     await Promise.all([
-    //   queryClient.invalidateQueries({
-    //     queryKey: ['households'],
-    //   }),
-    //   queryClient.invalidateQueries({
-    //     queryKey: ['residents'],
-    //   }),
-    //   queryClient.invalidateQueries({
-    //     queryKey: ['estate'],
-    //   }),
-    // ]);
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({

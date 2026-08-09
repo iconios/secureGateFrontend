@@ -19,10 +19,10 @@ import { HouseholdsTableData, MainEditHouseholdProps } from "./types";
 import { EmptyHouseholdTable } from "./emptyTable";
 import { SearchOutlined } from "@mui/icons-material";
 import { HouseholdTableSkeleton } from "./skeletonHouseholdsTable";
-import { useState } from "react";
 import { EditHousehold } from "./editHousehold";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { householdActions } from "../../../../../lib/features/household/householdSlice";
+import { RootState } from "../../../../../lib/store";
 
 export const HouseholdsTable = ({
   householdsTableData,
@@ -36,18 +36,18 @@ export const HouseholdsTable = ({
   isFetching: boolean;
 }) => {
   const data = householdsTableData?.households;
-  const [editOpen, setEditOpen] = useState(false);
   const dispatch = useDispatch();
-  const { insertEditHouseholdData, clearHouseholdData } = householdActions;
+  const { insertEditHouseholdData, clearHouseholdData, closeEditView, openEditView } = householdActions;
+  const {openEdit} = useSelector((state: RootState) => state.household)
 
   const handleEditHousehold = (data: MainEditHouseholdProps) => {
     dispatch(insertEditHouseholdData(data));
-    setEditOpen(true);
+    dispatch(openEditView());
   };
 
   const handleEditClose = () => {
     dispatch(clearHouseholdData());
-    setEditOpen(false);
+    dispatch(closeEditView());
   };
 
   if (data === null) {
@@ -193,7 +193,7 @@ export const HouseholdsTable = ({
       </Stack>
 
       {/* Edit household UI */}
-      <EditHousehold open={editOpen} setOpen={handleEditClose} />
+      <EditHousehold open={openEdit} setOpen={handleEditClose} />
     </Paper>
   );
 };

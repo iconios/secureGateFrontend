@@ -45,4 +45,5 @@ export type HouseholdSliceType = {
   phone: string;
   email: string;
   houseCode: string;
+  openEdit: boolean;
 };

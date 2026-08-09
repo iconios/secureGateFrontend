@@ -214,9 +214,9 @@ export type SwapPrincipalResidentType = {
   newPrincipalId: string;
 };
 
-export const DeleteFormSchema = (houseCode: string) => z.object({
-    reason: z.string().min(5, {message: "Reason cannot be empty"}),
+export const DeleteFormSchema = (houseCode: string) =>
+  z.object({
     confirm: z.literal(`${houseCode}`, {
-        message: "Please type in house code"
-    })
-  })
+      message: "Please type in the house code",
+    }),
+  });

@@ -13,6 +13,7 @@ const initialState: HouseholdSliceType = {
   phone: "",
   email: "",
   houseCode: "",
+  openEdit: false,
 };
 
 const householdSlice = createSlice({
@@ -46,6 +47,12 @@ const householdSlice = createSlice({
       if (phone !== undefined) state.phone = phone;
       if (email !== undefined) state.email = email;
       if (houseCode !== undefined) state.houseCode = houseCode;
+    },
+    openEditView: (state) => {
+      state.openEdit = true;
+    },
+    closeEditView: (state) => {
+      state.openEdit = false;
     },
     clearHouseholdData: () => {
       return initialState;

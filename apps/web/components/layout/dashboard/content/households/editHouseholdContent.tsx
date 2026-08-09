@@ -843,7 +843,9 @@ export const EditHouseholdDetails = ({
             type="button"
             variant="outlined"
             startIcon={<Delete color="error" />}
-            onClick={() => {setOpenDelete(true)}}
+            onClick={() => {
+              setOpenDelete(true);
+            }}
             sx={{ flexShrink: 0, borderColor: "red", color: "red" }}
           >
             Delete
@@ -1027,10 +1029,7 @@ export const EditHouseholdDetails = ({
       )}
 
       {/* Delete Household Dialog Box */}
-      <DeleteHouseholdRecord
-        open={openDelete}
-        setOpen={(setOpenDelete)}
-      />
+      <DeleteHouseholdRecord open={openDelete} setOpen={setOpenDelete} />
     </>
   );
 };

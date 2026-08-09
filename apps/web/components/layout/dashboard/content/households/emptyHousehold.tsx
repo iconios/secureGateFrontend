@@ -15,7 +15,13 @@ export const EmptyHousehold = ({ estateName }: { estateName: string }) => {
       }}
     >
       {/** Header text and metrics for household data */}
-      <HouseholdsHeader estateName={estateName} />
+      <HouseholdsHeader
+        estateName={estateName}
+        totalHouseholds={0}
+        totalMembers={0}
+        totalAssistants={0}
+        isFetching={false}
+      />
 
       {/** Empty table for household data */}
       <EmptyHouseholdTable />

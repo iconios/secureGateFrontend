@@ -187,3 +187,21 @@ export type GetNonPrincipalsByHouseholdServerResponse = {
     timestamp: string;
   };
 };
+
+export type DeleteHouseholdServerResponse = {
+  success: boolean;
+  message: string;
+  data: null | {
+    residentsCount: number;
+    householdCount: number;
+    householdId: string;
+    estateId: string;
+  };
+  error: null | {
+    code: string;
+    details: string;
+  };
+  metadata: {
+    timestamp: string;
+  };
+};
