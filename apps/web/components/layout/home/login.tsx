@@ -102,13 +102,9 @@ export default function LoginForm() {
     onSuccess: (userData) => {
       dispatch(authActions.loginSuccess(userData));
 
-      showToast.success(
-        "Credentials verified successfully! Redirecting to dashboard...",
-      );
+      showToast.success("Credentials verified successfully!");
 
-      setTimeout(() => {
-        router.replace("/dashboard");
-      }, 3000);
+      router.replace("/dashboard");
     },
   });
 

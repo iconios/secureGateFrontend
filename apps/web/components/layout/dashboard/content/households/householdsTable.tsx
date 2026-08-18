@@ -35,7 +35,7 @@ export const HouseholdsTable = ({
   setSearchTerm: (v: string) => void;
   isFetching: boolean;
 }) => {
-  const data = householdsTableData?.households;
+  const data = householdsTableData?.households ?? [];
   const dispatch = useDispatch();
   const {
     insertEditHouseholdData,
@@ -55,7 +55,7 @@ export const HouseholdsTable = ({
     dispatch(closeEditView());
   };
 
-  if (data === null) {
+  if (!isFetching && (!data || data.length === 0)) {
     return <EmptyHouseholdTable />;
   }
   return (
@@ -90,7 +90,7 @@ export const HouseholdsTable = ({
         <TableContainer component={Paper}>
           <Table
             sx={{ minWidth: 650 }}
-            aria-label="recent gate activity alerts"
+            aria-label="Households"
           >
             <TableHead>
               <TableRow>
@@ -139,6 +139,10 @@ export const HouseholdsTable = ({
                         phone: row.principalResident.phone,
                         email: row.principalResident.email,
                         houseCode: row.code,
+                        mobileAccess: row.mobileAccess ?? false,
+                        guestPreAuthorize: row.guestPreAuthorize ?? false,
+                        guestArrivalNotify: row.guestArrivalNotify ?? false,
+                        emergencyAlerts: row.emergencyAlerts ?? false,
                       });
                     }}
                   >

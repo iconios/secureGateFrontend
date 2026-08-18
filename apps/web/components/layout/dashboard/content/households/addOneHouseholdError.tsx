@@ -1,10 +1,10 @@
 import {
   Close,
-  Check,
   ArrowBack,
   SummarizeOutlined,
-  Warning,
   Refresh,
+  WarningOutlined,
+  ErrorOutlined,
 } from "@mui/icons-material";
 import {
   Dialog,
@@ -95,7 +95,7 @@ export const AddOneHouseholdError = ({
             right: 8,
             zIndex: 1,
           }}
-          aria-label="Close success dialog"
+          aria-label="Close error dialog"
           onClick={onClose}
         >
           <Close fontSize="medium" />
@@ -103,7 +103,7 @@ export const AddOneHouseholdError = ({
         <Box
           sx={{
             padding: 1.5,
-            borderRadius: "50%",
+            borderRadius: 2,
             width: { xs: 40, md: 50 },
             height: { xs: 40, md: 50 },
             display: "flex",
@@ -116,7 +116,7 @@ export const AddOneHouseholdError = ({
             backgroundColor: "red",
           }}
         >
-          <Check color="success" fontSize="large" />
+          <ErrorOutlined color="error" fontSize="medium" />
         </Box>
         <Typography
           sx={{
@@ -160,7 +160,7 @@ export const AddOneHouseholdError = ({
               mb: 1,
             }}
           >
-            <Warning fontSize="medium" color="error" /> {error.code}
+            <WarningOutlined fontSize="medium" color="error" /> {error.code}
           </Typography>
           <Typography
             sx={{
@@ -220,11 +220,8 @@ export const AddOneHouseholdError = ({
       <DialogActions
         sx={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "space-between",
           alignItems: "center",
-          gap: 1,
-          backgroundColor: "#e8e8e8",
-          padding: 2,
         }}
       >
         <Button

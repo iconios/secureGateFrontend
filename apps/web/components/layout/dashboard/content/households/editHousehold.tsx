@@ -33,6 +33,10 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
     dateOfBirth,
     phone,
     email,
+    mobileAccess,
+    guestPreAuthorize,
+    guestArrivalNotify,
+    emergencyAlerts,
   } = useSelector((state: RootState) => state.household);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState(photoUrl);
   const theme = useTheme();
@@ -74,6 +78,10 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
       blockOrStreet: "",
       principalPersonId: "",
       householdId: "",
+      mobileAccess: mobileAccess ?? false,
+      guestPreAuthorize: guestPreAuthorize ?? false,
+      guestArrivalNotify: guestArrivalNotify ?? false,
+      emergencyAlerts: emergencyAlerts ?? false,
     },
   });
 
@@ -96,6 +104,10 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
       blockOrStreet: blockOrStreet ?? "",
       householdId: householdId ?? "",
       principalPersonId: principalResidentId ?? "",
+      mobileAccess: mobileAccess ?? false,
+      guestPreAuthorize: guestPreAuthorize ?? false,
+      guestArrivalNotify: guestArrivalNotify ?? false,
+      emergencyAlerts: emergencyAlerts ?? false,
     });
 
     setPhotoPreviewUrl(photoUrl ?? "");
@@ -112,6 +124,10 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
     householdId,
     principalResidentId,
     reset,
+    mobileAccess,
+    guestPreAuthorize,
+    guestArrivalNotify,
+    emergencyAlerts,
   ]);
 
   const mutation = useMutation({
@@ -205,6 +221,22 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
 
     if (dirtyFields.blockOrStreet) {
       householdChanges.blockOrStreet = values.blockOrStreet;
+    }
+
+    if (dirtyFields.mobileAccess) {
+      householdChanges.mobileAccess = values.mobileAccess;
+    }
+
+    if (dirtyFields.guestPreAuthorize) {
+      householdChanges.guestPreAuthorize = values.guestPreAuthorize;
+    }
+
+    if (dirtyFields.guestArrivalNotify) {
+      householdChanges.guestArrivalNotify = values.guestArrivalNotify;
+    }
+
+    if (dirtyFields.emergencyAlerts) {
+      householdChanges.emergencyAlerts = values.emergencyAlerts;
     }
 
     // Principal fields

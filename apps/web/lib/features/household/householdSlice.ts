@@ -16,6 +16,10 @@ const initialState: HouseholdSliceType = {
   houseCode: "",
   openEdit: false,
   totalMembers: 0,
+  mobileAccess: false,
+  guestPreAuthorize: false,
+  guestArrivalNotify: false,
+  emergencyAlerts: false,
 };
 
 const householdSlice = createSlice({
@@ -37,6 +41,10 @@ const householdSlice = createSlice({
         email,
         houseCode,
         totalMembers,
+        mobileAccess,
+        guestPreAuthorize,
+        guestArrivalNotify,
+        emergencyAlerts,
       } = action.payload;
 
       if (householdId !== undefined) state.householdId = householdId;
@@ -53,6 +61,13 @@ const householdSlice = createSlice({
       if (phone !== undefined) state.phone = phone;
       if (email !== undefined) state.email = email;
       if (houseCode !== undefined) state.houseCode = houseCode;
+      if (mobileAccess !== undefined) state.mobileAccess = mobileAccess;
+      if (guestPreAuthorize !== undefined)
+        state.guestPreAuthorize = guestPreAuthorize;
+      if (guestArrivalNotify !== undefined)
+        state.guestArrivalNotify = guestArrivalNotify;
+      if (emergencyAlerts !== undefined)
+        state.emergencyAlerts = emergencyAlerts;
       if (totalMembers !== undefined) state.totalMembers = totalMembers;
     },
     openEditView: (state) => {

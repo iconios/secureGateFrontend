@@ -24,6 +24,7 @@ import {
   Drawer,
   Switch,
   Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -42,6 +43,11 @@ import { useSwapPrincipalResident } from "../../../../../hooks/useSwapPrincipalR
 import { householdActions } from "../../../../../lib/features/household/householdSlice";
 import { DeleteHouseholdRecord } from "./deleteHousehold";
 import { EditHouseholdSuccess } from "./editHouseholdSuccess";
+
+type BooleanChangeHandler = (
+  event: ChangeEvent<HTMLInputElement>,
+  checked: boolean,
+) => void;
 
 type ChangePrincipalSuccessNotificationData = {
   message: string;
@@ -109,36 +115,19 @@ const AccessControlUnit = ({
 }: {
   label: string;
   value: boolean;
-  handleChange: () => void;
+  handleChange: BooleanChangeHandler;
 }) => {
   return (
-    <Stack
-      direction="row"
+    <FormControlLabel
+      label={label}
+      labelPlacement="start"
+      control={<Switch checked={Boolean(value)} onChange={handleChange} />}
       sx={{
+        width: "100%",
         justifyContent: "space-between",
-        alignItems: "center",
-        display: "flex",
+        margin: 0,
       }}
-    >
-      <Typography
-        sx={{
-          color: "text.primary",
-          fontSize: { xs: 12, md: 14 },
-          fontWeight: 500,
-        }}
-      >
-        {label}
-      </Typography>
-      <Switch
-        checked={value}
-        onChange={handleChange}
-        slotProps={{
-          input: {
-            "aria-label": "access-control unit",
-          },
-        }}
-      />
-    </Stack>
+    />
   );
 };
 
@@ -149,47 +138,17 @@ const NotificationUnit = ({
 }: {
   label: string;
   value: boolean;
-  handleChange: () => void;
+  handleChange: (
+    event: ChangeEvent<HTMLInputElement>,
+    checked: boolean,
+  ) => void;
 }) => {
   return (
-    <Stack
-      direction="row"
-      spacing={1}
-      sx={{
-        alignItems: "center",
-        display: "flex",
-      }}
-    >
-      <Checkbox
-        checked={value}
-        onChange={handleChange}
-        slotProps={{
-          input: {
-            "aria-label": "notification preference unit",
-          },
-        }}
-      />
-      <Typography
-        sx={{
-          color: "text.primary",
-          fontSize: { xs: 12, md: 14 },
-          fontWeight: 500,
-        }}
-      >
-        {label}
-      </Typography>
-    </Stack>
+    <FormControlLabel
+      label={label}
+      control={<Checkbox checked={Boolean(value)} onChange={handleChange} />}
+    />
   );
-};
-
-type AccessControlDataType = {
-  mobileAccess: boolean;
-  guestPreAuthorize: boolean;
-};
-
-type NotificationDataType = {
-  guestArrivalNotify: boolean;
-  emergencyAlerts: boolean;
 };
 
 export const EditHouseholdDetails = ({
@@ -213,7 +172,6 @@ export const EditHouseholdDetails = ({
   const theme = useTheme();
   const dispatch = useDispatch();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { control } = useFormContext<EditPrincipalType>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState("");
@@ -222,10 +180,6 @@ export const EditHouseholdDetails = ({
   const { insertEditHouseholdData } = householdActions;
   const [openDelete, setOpenDelete] = useState(false);
   const [openSuccessNotification, setOpenSuccessNotification] = useState(false);
-  const [accessControl, setAccessControl] =
-    useState<AccessControlDataType | null>(null);
-  const [notificationPref, setNotificationPref] =
-    useState<NotificationDataType | null>(null);
   const [successData, setSuccessData] =
     useState<ChangePrincipalSuccessNotificationData | null>(null);
 
@@ -245,7 +199,9 @@ export const EditHouseholdDetails = ({
   const mutation = useSwapPrincipalResident(estateId, householdId);
 
   // Get user id
-  const user = useSelector((state: RootState) => state.auth.user);
+  const user = useSelector(
+    (state: RootState) => (state as RootState).auth.user,
+  );
   const userId = user && "id" in user ? user.id : "";
 
   // useImageUpload hook for handling image uploads and validations
@@ -254,6 +210,8 @@ export const EditHouseholdDetails = ({
     error: uploadError,
     loading: uploadLoading,
   } = useImageUpload({ userId });
+  
+  const { control } = useFormContext<EditPrincipalType>();
 
   const [watchedUnitNumber, watchedBlockOrStreet] = useWatch({
     control,
@@ -973,25 +931,27 @@ export const EditHouseholdDetails = ({
               }}
             >
               <TabSubTitle label="Access Control" />
-              <AccessControlUnit
-                label="Enable Mobile App Access"
-                value={accessControl?.mobileAccess ?? false}
-                handleChange={() =>
-                  setAccessControl((prev) => ({
-                    mobileAccess: !accessControl?.mobileAccess,
-                    guestPreAuthorize: prev?.guestPreAuthorize ?? false,
-                  }))
-                }
+              <Controller
+                name="mobileAccess"
+                control={control}
+                render={({ field }) => (
+                  <AccessControlUnit
+                    label="Enable Mobile App Access"
+                    value={Boolean(field.value)}
+                    handleChange={(_, checked) => field.onChange(checked)}
+                  />
+                )}
               />
-              <AccessControlUnit
-                label="Allow Guest Pre-authorization"
-                value={accessControl?.guestPreAuthorize ?? false}
-                handleChange={() =>
-                  setAccessControl((prev) => ({
-                    mobileAccess: prev?.mobileAccess ?? false,
-                    guestPreAuthorize: !accessControl?.guestPreAuthorize,
-                  }))
-                }
+              <Controller
+                name="guestPreAuthorize"
+                control={control}
+                render={({ field }) => (
+                  <AccessControlUnit
+                    label="Allow Guest Pre-authorization"
+                    value={Boolean(field.value)}
+                    handleChange={(_, checked) => field.onChange(checked)}
+                  />
+                )}
               />
             </Box>
 
@@ -1001,26 +961,30 @@ export const EditHouseholdDetails = ({
               }}
             >
               <TabSubTitle label="Notification Preferences" />
-              <NotificationUnit
-                label="Notify on Guest Arrival"
-                value={notificationPref?.guestArrivalNotify ?? false}
-                handleChange={() =>
-                  setNotificationPref((prev) => ({
-                    guestArrivalNotify: !notificationPref?.guestArrivalNotify,
-                    emergencyAlerts: prev?.emergencyAlerts ?? false,
-                  }))
-                }
-              />
-              <NotificationUnit
-                label="Emergency Alerts"
-                value={notificationPref?.emergencyAlerts ?? false}
-                handleChange={() =>
-                  setNotificationPref((prev) => ({
-                    guestArrivalNotify: prev?.guestArrivalNotify ?? false,
-                    emergencyAlerts: !notificationPref?.emergencyAlerts,
-                  }))
-                }
-              />
+              <Stack direction="column" spacing={1}>
+                <Controller
+                  name="guestArrivalNotify"
+                  control={control}
+                  render={({ field }) => (
+                    <NotificationUnit
+                      label="Notify on Guest Arrival"
+                      value={Boolean(field.value)}
+                      handleChange={(_, checked) => field.onChange(checked)}
+                    />
+                  )}
+                />
+                <Controller
+                  name="emergencyAlerts"
+                  control={control}
+                  render={({ field }) => (
+                    <NotificationUnit
+                      label="Emergency Alerts"
+                      value={Boolean(field.value)}
+                      handleChange={(_, checked) => field.onChange(checked)}
+                    />
+                  )}
+                />
+              </Stack>
             </Box>
           </Box>
         )}

@@ -19,6 +19,10 @@ export type FetchHouseholdsByEstateServerResponse = {
           code: string;
           unitNumber: string;
           blockOrStreet: string | null;
+          mobileAccess: boolean;
+          guestPreAuthorize: boolean;
+          guestArrivalNotify: boolean;
+          emergencyAlerts: boolean;
           principalResident: {
             id: string;
             residentId: string | null;
@@ -134,6 +138,10 @@ export type UpdateHouseholdAndPrincipalType = {
     | {
         unitNumber?: string;
         blockOrStreet?: string;
+        mobileAccess?: boolean;
+        guestPreAuthorize?: boolean;
+        guestArrivalNotify?: boolean;
+        emergencyAlerts?: boolean;
       }
     | undefined;
   principal:
@@ -154,17 +162,17 @@ export type UpdateHouseholdAndPrincipalServerResponse = {
   data: null | {
     household: {
       id: string;
-      createdAt: string;
-      updatedAt: string | null;
       code: string;
       estateId: string;
       blockOrStreet: string | null;
       unitNumber: string;
+      mobileAccess: boolean;
+      guestPreAuthorize: boolean;
+      guestArrivalNotify: boolean;
+      emergencyAlerts: boolean;
     };
     principal: {
       id: string;
-      createdAt: string;
-      updatedAt: string | null;
       fullName: string;
       gender: "male" | "female";
       dateOfBirth: string | null;

@@ -47,5 +47,9 @@ export type HouseholdSliceType = {
   email: string;
   houseCode: string;
   openEdit: boolean;
+  mobileAccess: boolean;
+  guestPreAuthorize: boolean;
+  guestArrivalNotify: boolean;
+  emergencyAlerts: boolean;
   totalMembers: number;
 };

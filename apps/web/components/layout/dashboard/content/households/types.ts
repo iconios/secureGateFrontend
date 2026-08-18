@@ -16,6 +16,10 @@ export type HouseholdsTableData = {
         code: string;
         unitNumber: string;
         blockOrStreet: string | null;
+        mobileAccess: boolean;
+        guestPreAuthorize: boolean;
+        guestArrivalNotify: boolean;
+        emergencyAlerts: boolean;
         principalResident: {
           id: string;
           residentId: string | null;
@@ -121,6 +125,10 @@ export const EditPrincipalSchema = CreatedResidentSchema.omit({
     .trim()
     .min(1, "Minimum of one character is required"),
   householdId: z.string().trim().min(1, "Minimum of one character is required"),
+  mobileAccess: z.boolean(),
+  guestPreAuthorize: z.boolean(),
+  guestArrivalNotify: z.boolean(),
+  emergencyAlerts: z.boolean(),
 });
 
 export type EditPrincipalType = z.infer<typeof EditPrincipalSchema>;
@@ -179,6 +187,10 @@ export type MainEditHouseholdProps = {
   phone: string;
   email: string;
   houseCode: string;
+  mobileAccess: boolean;
+  guestPreAuthorize: boolean;
+  guestArrivalNotify: boolean;
+  emergencyAlerts: boolean;
 };
 
 export type UpdateHouseholdAndPrincipalApiSuccess = {
