@@ -206,6 +206,7 @@ export type UpdateHouseholdAndPrincipalApiSuccess = {
       estateId: string;
       email: string;
     };
+    totalResidents: number;
   };
 };
 
@@ -220,3 +221,33 @@ export const DeleteFormSchema = (houseCode: string) =>
       message: "Please type in the house code",
     }),
   });
+
+export type EditHouseholdSuccessData = {
+  subTitle: string;
+  backButtonName: string;
+  backFunction: () => void;
+  unitDetails: string;
+  principalFullName: string;
+  totalResidents: string;
+};
+
+export type AddHouseholdSuccessData = {
+  open: boolean;
+  subTitle: string;
+  backButtonName: string;
+  onClose: () => void;
+  onBack: () => void;
+  onAddAnother: () => void;
+};
+
+export type AddOneHouseholdErrorData = {
+  open: boolean;
+  message: string;
+  error: {
+    code: string;
+    details: string;
+  };
+  onClose: () => void;
+  onBack: () => void;
+  onRetry: () => void;
+};

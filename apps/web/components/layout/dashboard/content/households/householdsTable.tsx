@@ -37,8 +37,13 @@ export const HouseholdsTable = ({
 }) => {
   const data = householdsTableData?.households;
   const dispatch = useDispatch();
-  const { insertEditHouseholdData, clearHouseholdData, closeEditView, openEditView } = householdActions;
-  const {openEdit} = useSelector((state: RootState) => state.household)
+  const {
+    insertEditHouseholdData,
+    clearHouseholdData,
+    closeEditView,
+    openEditView,
+  } = householdActions;
+  const { openEdit } = useSelector((state: RootState) => state.household);
 
   const handleEditHousehold = (data: MainEditHouseholdProps) => {
     dispatch(insertEditHouseholdData(data));

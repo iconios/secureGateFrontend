@@ -9,7 +9,7 @@ export const useSwapPrincipalResident = (
   const queryClient = useQueryClient();
 
   return useMutation<
-    SwapPrincipalResidentServerResponse["data"],
+    SwapPrincipalResidentServerResponse,
     Error,
     SwapPrincipalResidentType
   >({
@@ -60,6 +60,7 @@ export const useSwapPrincipalResident = (
 
       try {
         result = (await response.json()) as SwapPrincipalResidentServerResponse;
+        console.log("Swap custom hook result", result);
       } catch {
         throw new Error(
           `The server returned an invalid response (${response.status}).`,
@@ -72,7 +73,7 @@ export const useSwapPrincipalResident = (
         });
       }
 
-      return result.data;
+      return result;
     },
     onSuccess: async () => {
       await Promise.all([

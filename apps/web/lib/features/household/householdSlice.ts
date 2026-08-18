@@ -3,6 +3,7 @@ import { HouseholdSliceType } from "./types";
 
 const initialState: HouseholdSliceType = {
   householdId: "",
+  principalPersonId: "",
   principalResidentId: "",
   unitNumber: "",
   blockOrStreet: "",
@@ -14,6 +15,7 @@ const initialState: HouseholdSliceType = {
   email: "",
   houseCode: "",
   openEdit: false,
+  totalMembers: 0,
 };
 
 const householdSlice = createSlice({
@@ -24,6 +26,7 @@ const householdSlice = createSlice({
       const {
         householdId,
         principalResidentId,
+        principalPersonId,
         unitNumber,
         blockOrStreet,
         photoUrl,
@@ -33,11 +36,14 @@ const householdSlice = createSlice({
         phone,
         email,
         houseCode,
+        totalMembers,
       } = action.payload;
 
       if (householdId !== undefined) state.householdId = householdId;
       if (principalResidentId !== undefined)
         state.principalResidentId = principalResidentId;
+      if (principalPersonId !== undefined)
+        state.principalPersonId = principalPersonId;
       if (unitNumber !== undefined) state.unitNumber = unitNumber;
       if (blockOrStreet !== undefined) state.blockOrStreet = blockOrStreet;
       if (photoUrl !== undefined) state.photoUrl = photoUrl;
@@ -47,6 +53,7 @@ const householdSlice = createSlice({
       if (phone !== undefined) state.phone = phone;
       if (email !== undefined) state.email = email;
       if (houseCode !== undefined) state.houseCode = houseCode;
+      if (totalMembers !== undefined) state.totalMembers = totalMembers;
     },
     openEditView: (state) => {
       state.openEdit = true;

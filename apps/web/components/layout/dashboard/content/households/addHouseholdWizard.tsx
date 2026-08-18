@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { HouseholdUnitDetailsProvision } from "./addUnitDetails";
 import {
   Box,
@@ -13,7 +13,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   ArrowForwardOutlined,
   CancelOutlined,
@@ -35,6 +35,8 @@ import { useCreateHouseholds } from "../../../../../hooks/useCreateHouseholds";
 import { showToast } from "../../../../../utils/toast";
 import { RootState } from "../../../../../lib/store";
 import { useGetAllNonPrincipalsByEstate } from "../../../../../hooks/useGetAllNonPrincipalsByEstate";
+import { householdActions } from "../../../../../lib/features/household/householdSlice";
+import { AddOneHouseholdSuccess } from "./addOneHouseholdSuccess";
 
 enum HouseholdWizardSteps {
   UnitDetails = 0,
@@ -52,15 +54,21 @@ export const AddHouseholdWizardDialog = ({
 }) => {
   // Local state variables
   const [activeStep, setActiveStep] = useState(0);
+  const dispatch = useDispatch();
   const [customOptions, setCustomOptions] = useState<string[]>([]);
-  const estateId = useSelector((state) => (state as RootState).estate.estateId);
-  console.log("estate id", estateId);
-  const { isError, error, mutateAsync, isPending, reset } =
-    useCreateHouseholds(estateId);
   const [searchTerm, setSearchTerm] = useState("");
   const [debounceSearchTerm, setDebounceSearchTerm] = useState("");
   const [shouldFetchExistingResidents, setShouldFetchExistingResidents] =
     useState(false);
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const estateId = useSelector((state) => (state as RootState).estate.estateId);
+  const {
+    isError,
+    error,
+    mutateAsync,
+    isPending,
+    reset: resetMutation,
+  } = useCreateHouseholds(estateId);
 
   useEffect(() => {
     const delayDebounceFunction = setTimeout(() => {
@@ -112,19 +120,25 @@ export const AddHouseholdWizardDialog = ({
 
   const { handleSubmit, trigger } = methods;
 
-  // Wizard handlers
+  // Reset Wizard handlers and form variables
+  const resetWizard = useCallback(() => {
+    methods.reset();
+    setActiveStep(HouseholdWizardSteps.UnitDetails);
+    setCustomOptions([]);
+    setPhotoPreviewUrl("");
+    setSearchTerm("");
+    setDebounceSearchTerm("");
+    setShouldFetchExistingResidents(false);
+  }, [methods]);
+
   const handleClose = () => {
     if (isPending) {
       return;
     }
 
-    methods.reset();
-    reset();
-
-    setActiveStep(HouseholdWizardSteps.UnitDetails);
-    setCustomOptions([]);
-    setPhotoPreviewUrl("");
-
+    setOpenSuccess(false);
+    resetWizard();
+    resetMutation();
     onClose();
   };
 
@@ -150,10 +164,12 @@ export const AddHouseholdWizardDialog = ({
       : [];
 
   const handleNext = async () => {
+    if (isPending) return;
+
     if (activeStep === HouseholdWizardSteps.Review) {
       setSearchTerm("");
       setDebounceSearchTerm("");
-      await handleSubmit(handleFormSubmit)();
+      await handleSubmit(onSubmit)();
       return;
     }
 
@@ -196,6 +212,12 @@ export const AddHouseholdWizardDialog = ({
       setSearchTerm("");
       setDebounceSearchTerm("");
     }
+  };
+
+  // Handler to close the success notification
+  const handleCloseSuccessDialog = () => {
+    setOpenSuccess(false);
+    onClose();
   };
 
   // Step Content Renderer
@@ -258,29 +280,57 @@ export const AddHouseholdWizardDialog = ({
   };
 
   // Handler for form submit
-  const handleFormSubmit = async (data: CreateHouseholdPayload) => {
+  const onSubmit = async (payload: CreateHouseholdPayload) => {
     try {
-      await mutateAsync(data);
+      const result = await mutateAsync(payload);
 
-      methods.reset();
-      setActiveStep(HouseholdWizardSteps.UnitDetails);
-      setCustomOptions([]);
-      setPhotoPreviewUrl("");
+      const createdHousehold = result?.households?.[0];
 
-      onClose();
-    } catch {
-      // The error is available through createHouseholds.error.
-      // Keep the dialog open so it can be displayed to the user.
+      if (!createdHousehold) {
+        console.error("Unexpected create-household response:", result);
+
+        showToast.error(
+          "The household was created, but the server returned an invalid response.",
+        );
+        return;
+      }
+
+      dispatch(
+        householdActions.insertEditHouseholdData({
+          unitNumber: createdHousehold.unitNumber,
+          blockOrStreet: createdHousehold.blockOrStreet,
+          houseCode: createdHousehold.code,
+          fullName: createdHousehold.principalResident?.fullName ?? "",
+          photoUrl: createdHousehold.principalResident?.photoUrl ?? "",
+          totalMembers: createdHousehold.members?.length ?? 0,
+        }),
+      );
+
+      resetWizard();
+      resetMutation();
+      setOpenSuccess(true);
+    } catch (submissionError) {
+      console.error("Household creation failed:", submissionError);
     }
   };
 
-  if (isError) {
+  useEffect(() => {
+    console.log("AddHouseholdWizardDialog mounted");
+
+    return () => {
+      console.log("AddHouseholdWizardDialog unmounted");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isError) return;
+
     const errorMessage =
       error instanceof Error
         ? error.message
         : "Error encountered during household creation";
     showToast.error(errorMessage);
-  }
+  }, [error, isError]);
 
   const submitButtonLabel = () => {
     if (isPending) return "Submitting...";
@@ -288,10 +338,20 @@ export const AddHouseholdWizardDialog = ({
     return "Next";
   };
 
+  useEffect(() => {
+    if (!open || estateId) return;
+
+    showToast.error("No estate has been selected.");
+  }, [estateId, open]);
+
+  if (!estateId) {
+    return null;
+  }
+
   return (
     <Box>
       {/** Changing content UI based on household creation steps */}
-      <Dialog open={open} onClose={() => handleClose()}>
+      <Dialog open={open && !openSuccess} onClose={handleClose}>
         <DialogTitle>
           {/** Heading and subheading */}
           <Stack
@@ -324,7 +384,11 @@ export const AddHouseholdWizardDialog = ({
                 Initialize a new residential record with the estate system.
               </Typography>
             </Box>
-            <IconButton onClick={handleClose}>
+            <IconButton
+              onClick={handleClose}
+              disabled={isPending}
+              aria-label="Close add household dialog"
+            >
               <Close fontSize="medium" />
             </IconButton>
           </Stack>
@@ -394,6 +458,18 @@ export const AddHouseholdWizardDialog = ({
           </Box>
         </FormProvider>
       </Dialog>
+
+      {/* Successful mutation notification */}
+      <AddOneHouseholdSuccess
+        open={open && openSuccess}
+        subTitle="Household and residents successfully provisioned"
+        backButtonName="Back to Households"
+        onClose={handleCloseSuccessDialog}
+        onBack={handleCloseSuccessDialog}
+        onAddAnother={() => {
+          setOpenSuccess(false);
+        }}
+      />
     </Box>
   );
 };

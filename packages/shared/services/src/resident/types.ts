@@ -33,19 +33,26 @@ export type GetNonPrincipalsByEstateServerResponse = {
 export type SwapPrincipalResidentServerResponse = {
   success: boolean;
   message: string;
-  data: {
-    oldPrincipalId: string;
-    newPrincipal: {
+  data: null | {
+    household: {
+      id: string;
+      code: string;
+      estateId: string;
+      blockOrStreet: string | null;
+      unitNumber: string;
+    };
+    principal: {
       id: string;
       fullName: string;
-      phone: string | null;
-      photoUrl: string | null;
-      email: string | null;
-      gender: "male" | "female" | "unknown";
+      gender: "male" | "female";
       dateOfBirth: string | null;
-      role: "principal" | "assistant" | "member";
+      photoUrl: string | null;
+      phone: string;
+      estateId: string;
+      email: string;
     };
-  } | null;
+    totalResidents: number;
+  };
   error: {
     code: string;
     details: string;

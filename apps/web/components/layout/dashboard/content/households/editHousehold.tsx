@@ -7,15 +7,18 @@ import { useForm, FormProvider } from "react-hook-form";
 import {
   EditPrincipalSchema,
   EditPrincipalType,
-  UpdateHouseholdAndPrincipalApiSuccess,
   OpenHandleProps,
 } from "./types";
 import { EditHouseholdDetails } from "./editHouseholdContent";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { UpdateHouseholdAndPrincipalType } from "@shared/services/household";
+import {
+  UpdateHouseholdAndPrincipalServerResponse,
+  UpdateHouseholdAndPrincipalType,
+} from "@shared/services/household";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../lib/store";
 import { showToast } from "../../../../../utils/toast";
+import { EditHouseholdSuccess } from "./editHouseholdSuccess";
 
 export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
   // Initialize local variables
@@ -30,20 +33,30 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
     dateOfBirth,
     phone,
     email,
-    houseCode,
   } = useSelector((state: RootState) => state.household);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState(photoUrl);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeTab, setActiveTab] = useState(0);
-  const estateId = useSelector(
-    (state: RootState) => (state as RootState).estate.estateId,
-  );
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const [successData, setSuccessData] = useState({
+    message: "",
+    unitDetails: "",
+    principalFullName: "",
+    totalResidents: "",
+  });
+  const estateId = useSelector((state: RootState) => state.estate.estateId);
   const queryClient = useQueryClient();
 
   const handleClose = () => {
     setOpen(false);
     setActiveTab(0);
+    setSuccessData({
+      message: "",
+      unitDetails: "",
+      principalFullName: "",
+      totalResidents: "",
+    });
   };
 
   // Form initialization
@@ -98,15 +111,10 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
     blockOrStreet,
     householdId,
     principalResidentId,
-    houseCode,
     reset,
   ]);
 
-  const mutation = useMutation<
-    UpdateHouseholdAndPrincipalApiSuccess,
-    Error,
-    UpdateHouseholdAndPrincipalType
-  >({
+  const mutation = useMutation({
     mutationKey: [
       "household",
       "principal",
@@ -115,8 +123,18 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
       principalResidentId,
     ],
     mutationFn: async (data: UpdateHouseholdAndPrincipalType) => {
+      if (!estateId || !householdId || !principalResidentId) {
+        throw new Error("Missing household or principal information");
+      }
+
+      const params = new URLSearchParams({
+        estateId,
+        householdId,
+        principalResidentId,
+      });
+
       const response = await fetch(
-        `/api/household/updateHouseholdAndPrincipal?estateId=${estateId}&householdId=${householdId}&principalResidentId=${principalResidentId}`,
+        `/api/household/updateHouseholdAndPrincipal?${params.toString()}`,
         {
           method: "PATCH",
           headers: {
@@ -128,16 +146,39 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
 
       if (!response.ok) {
         const errorText = await response.text();
+
         throw new Error(
           errorText || "Failed to update household and principal",
         );
       }
 
-      return (await response.json()) as UpdateHouseholdAndPrincipalApiSuccess;
+      return (await response.json()) as UpdateHouseholdAndPrincipalServerResponse;
     },
-    onSuccess: () => {
+    onSuccess: (responseData) => {
+      console.log("Success data", responseData);
+
+      const { message, data } = responseData;
+
+      if (!data) {
+        showToast.error(
+          "The update succeeded, but no updated data was returned",
+        );
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ["households", estateId] });
-      // handleClose();
+
+      setSuccessData({
+        message,
+        unitDetails: [data.household.unitNumber, data.household.blockOrStreet]
+          .filter(Boolean)
+          .join(" "),
+        principalFullName: data.principal.fullName ?? "",
+        totalResidents: String(data.totalResidents ?? 0),
+      });
+
+      setOpen(false);
+      setActiveTab(0);
+      setOpenSuccess(true);
     },
     onError: (error) => {
       const errMessage =
@@ -148,7 +189,7 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
     },
   });
 
-  const onSubmit = (values: EditPrincipalType) => {
+  const onSubmit = async (values: EditPrincipalType) => {
     const householdChanges: NonNullable<
       UpdateHouseholdAndPrincipalType["household"]
     > = {};
@@ -213,11 +254,11 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
       Object.keys(householdChanges).length === 0 &&
       Object.keys(principalChanges).length === 0
     ) {
-      // showToast.error("No changes were made");
+      showToast.error("No changes were made");
       return;
     }
 
-    mutation.mutate(payload);
+    await mutation.mutateAsync(payload);
   };
 
   const contentProps = {
@@ -231,83 +272,97 @@ export const EditHousehold = ({ open, setOpen }: OpenHandleProps) => {
   };
 
   return (
-    <FormProvider {...methods}>
-      {isMobile ? (
-        <Modal
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="edit-household-title"
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            p: 2,
-          }}
-        >
-          <Box
-            component="form"
-            onSubmit={handleSubmit(onSubmit)}
+    <>
+      <FormProvider {...methods}>
+        {isMobile ? (
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="edit-household-title"
             sx={{
-              position: "relative",
-              width: "100%",
-              maxWidth: 480,
-              maxHeight: "90dvh",
-              bgcolor: "background.paper",
-              borderRadius: 2,
-              boxShadow: 24,
               display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-              outline: "none",
+              alignItems: "center",
+              justifyContent: "center",
+              p: 2,
             }}
           >
-            <EditHouseholdDetails {...contentProps} />
-          </Box>
-        </Modal>
-      ) : (
-        <Drawer
-          anchor="right"
-          open={open}
-          onClose={handleClose}
-          sx={{
-            zIndex: (theme) => theme.zIndex.appBar + 1,
-          }}
-          slotProps={{
-            paper: {
-              sx: {
-                width: 420,
-                maxWidth: "100vw",
-                position: "fixed",
-                top: 0,
-                right: 0,
-                bottom: 0,
-                marginTop: 0,
-                height: "auto",
-                maxHeight: "100dvh",
+            <Box
+              component="form"
+              onSubmit={handleSubmit(onSubmit)}
+              sx={{
+                position: "relative",
+                width: "100%",
+                maxWidth: 480,
+                maxHeight: "90dvh",
+                bgcolor: "background.paper",
+                borderRadius: 2,
+                boxShadow: 24,
                 display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
-                zIndex: (theme) => theme.zIndex.appBar + 1,
-                paddingTop: 10,
-              },
-            },
-          }}
-        >
-          <Box
-            component="form"
-            onSubmit={handleSubmit(onSubmit)}
+                outline: "none",
+              }}
+            >
+              <EditHouseholdDetails {...contentProps} />
+            </Box>
+          </Modal>
+        ) : (
+          <Drawer
+            anchor="right"
+            open={open}
+            onClose={handleClose}
             sx={{
-              height: "100%",
-              minHeight: 0,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
+              zIndex: (theme) => theme.zIndex.appBar + 1,
+            }}
+            slotProps={{
+              paper: {
+                sx: {
+                  width: 420,
+                  maxWidth: "100vw",
+                  position: "fixed",
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  marginTop: 0,
+                  height: "auto",
+                  maxHeight: "100dvh",
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                  zIndex: (theme) => theme.zIndex.appBar + 1,
+                  paddingTop: 10,
+                },
+              },
             }}
           >
-            <EditHouseholdDetails {...contentProps} />
-          </Box>
-        </Drawer>
-      )}
-    </FormProvider>
+            <Box
+              component="form"
+              onSubmit={handleSubmit(onSubmit)}
+              sx={{
+                height: "100%",
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }}
+            >
+              <EditHouseholdDetails {...contentProps} />
+            </Box>
+          </Drawer>
+        )}
+      </FormProvider>
+
+      {/* Edit Household Success */}
+      <EditHouseholdSuccess
+        open={openSuccess}
+        setOpen={() => setOpenSuccess(false)}
+        subTitle={successData.message}
+        backButtonName="Back to Households"
+        backFunction={() => setOpenSuccess(false)}
+        unitDetails={successData.unitDetails}
+        principalFullName={successData.principalFullName}
+        totalResidents={`${successData.totalResidents}`}
+      />
+    </>
   );
 };

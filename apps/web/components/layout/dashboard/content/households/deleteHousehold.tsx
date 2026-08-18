@@ -24,12 +24,15 @@ import { householdActions } from "../../../../../lib/features/household/househol
 export const DeleteHouseholdRecord = ({ open, setOpen }: OpenHandleProps) => {
   // Initialize local variables
   const dispatch = useDispatch();
-  const {clearHouseholdData, closeEditView} = householdActions;
+  const { clearHouseholdData, closeEditView } = householdActions;
   const { houseCode, householdId } = useSelector(
     (state: RootState) => state.household,
   );
   const estateId = useSelector((state: RootState) => state.estate.estateId);
-  const {mutateAsync, isPending: isDeleting} = useDeleteHousehold(estateId, householdId);
+  const { mutateAsync, isPending: isDeleting } = useDeleteHousehold(
+    estateId,
+    householdId,
+  );
   const {
     control,
     handleSubmit,
@@ -43,13 +46,13 @@ export const DeleteHouseholdRecord = ({ open, setOpen }: OpenHandleProps) => {
     },
   });
 
-    const isBusy = isSubmitting || isDeleting;
+  const isBusy = isSubmitting || isDeleting;
 
   const handleClose = () => {
     if (isBusy) return;
 
     reset({
-        confirm: "",
+      confirm: "",
     });
     setOpen(false);
   };
@@ -58,7 +61,7 @@ export const DeleteHouseholdRecord = ({ open, setOpen }: OpenHandleProps) => {
     await mutateAsync();
 
     reset({
-        confirm: "",
+      confirm: "",
     });
 
     dispatch(closeEditView());
@@ -127,7 +130,7 @@ export const DeleteHouseholdRecord = ({ open, setOpen }: OpenHandleProps) => {
         >
           <Close
             sx={{
-              fontSize: { xs: "small", md: "large" },
+              fontSize: "medium",
             }}
           />
         </IconButton>

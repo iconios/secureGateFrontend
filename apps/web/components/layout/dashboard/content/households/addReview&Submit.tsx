@@ -246,6 +246,7 @@ export const AddReviewAndSubmit = ({
             backgroundColor: "#FFFFFF",
             paddingX: 1,
             paddingY: 2,
+            borderRadius: 1,
           }}
         >
           <SummaryItem
@@ -302,12 +303,14 @@ export const AddReviewAndSubmit = ({
                   alignItems: "center",
                 }}
               >
-                <Image
-                  src={principalPhotoUrl() ?? ""}
-                  alt={principalFullname() ?? "Principal resident"}
-                  width={45}
-                  height={45}
-                />
+                {principalPhotoUrl() && (
+                  <Image
+                    src={principalPhotoUrl() ?? ""}
+                    alt={principalFullname() ?? "Principal resident"}
+                    width={45}
+                    height={45}
+                  />
+                )}
                 <Box>
                   <SummaryItem
                     label="principal resident"
@@ -364,7 +367,7 @@ export const AddReviewAndSubmit = ({
                 })}
             </Box>
             <Box>
-              <SummaryOtherTitle title="VEHICLES (1)" />
+              <SummaryOtherTitle title="VEHICLES (0)" />
               <Typography
                 variant="body2"
                 sx={{

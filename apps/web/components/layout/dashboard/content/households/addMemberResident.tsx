@@ -239,7 +239,9 @@ export const AddMemberResident = ({
   }, [estateId, memberMode, setShouldFetchExistingResidents]);
 
   // Get user id
-  const user = useSelector((state: RootState) => state.auth.user);
+  const user = useSelector(
+    (state: RootState) => (state as RootState).auth.user,
+  );
   const userId = user && "id" in user ? user.id : "";
   // useImageUpload hook for handling image uploads and validations
   const {

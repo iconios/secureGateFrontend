@@ -82,34 +82,52 @@ export type CreateHouseholdInput = {
   }[];
 };
 
-export type CreateHouseholdServerResponse = {
-  success: boolean;
-  message: string;
-  data:
-    | {}
-    | {
-        householdId: string;
-        unitNumber: string;
-        code: string;
-        principalResident: {
-          personId: string;
-          code?: string;
-        };
-        members: {
-          personId: string;
-          code?: string;
-        }[];
-      }[];
-  error:
-    | {}
-    | {
-        code: string;
-        details: any;
-      };
-  metadata: {
-    timestamp: string;
+export type CreatedHouseholdSummary = {
+  householdId: string;
+  unitNumber: string;
+  blockOrStreet: string;
+  code: string;
+  principalResident: {
+    personId: string;
+    code: string;
+    fullName: string;
+    photoUrl: string;
   };
+  members: {
+    personId: string;
+    code: string;
+  }[];
 };
+
+export type CreateHouseholdData = {
+  households: CreatedHouseholdSummary[];
+  count: number;
+};
+
+type ResponseMetadata = {
+  timestamp: string;
+};
+
+type CreateHouseholdError = {
+  code: string;
+  details?: unknown;
+};
+
+export type CreateHouseholdServerResponse =
+  | {
+      success: true;
+      message: string;
+      data: CreateHouseholdData;
+      error: null;
+      metadata: ResponseMetadata;
+    }
+  | {
+      success: false;
+      message: string;
+      data: null;
+      error: CreateHouseholdError;
+      metadata: ResponseMetadata;
+    };
 
 export type UpdateHouseholdAndPrincipalType = {
   household:
@@ -148,13 +166,14 @@ export type UpdateHouseholdAndPrincipalServerResponse = {
       createdAt: string;
       updatedAt: string | null;
       fullName: string;
-      gender: "male" | "female" | "unknown";
+      gender: "male" | "female";
       dateOfBirth: string | null;
       photoUrl: string | null;
       phone: string;
       estateId: string;
       email: string;
     };
+    totalResidents: number;
   };
   error: null | {
     code: string;

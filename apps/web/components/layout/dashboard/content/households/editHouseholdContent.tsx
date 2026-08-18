@@ -22,6 +22,8 @@ import {
   DialogActions,
   DialogContent,
   Drawer,
+  Switch,
+  Checkbox,
 } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -39,6 +41,14 @@ import { ChangePrincipalResident } from "./changePrincipalResident";
 import { useSwapPrincipalResident } from "../../../../../hooks/useSwapPrincipalResident";
 import { householdActions } from "../../../../../lib/features/household/householdSlice";
 import { DeleteHouseholdRecord } from "./deleteHousehold";
+import { EditHouseholdSuccess } from "./editHouseholdSuccess";
+
+type ChangePrincipalSuccessNotificationData = {
+  message: string;
+  unitDetails: string;
+  principalFullName: string;
+  totalResidents: string;
+};
 
 const UnitInfo = ({ label, value }: { label: string; value: string }) => {
   return (
@@ -80,9 +90,9 @@ const TabSubTitle = ({ label }: { label: string }) => {
       variant="h3"
       sx={{
         color: "text.primary",
-        fontSize: { xs: 16, md: 20 },
+        fontSize: { xs: 14, md: 16 },
         fontWeight: 600,
-        marginBottom: { xs: 2, md: 3 },
+        marginBottom: { xs: 1, md: 2 },
         textTransform: "uppercase",
         paddingTop: 3,
       }}
@@ -90,6 +100,96 @@ const TabSubTitle = ({ label }: { label: string }) => {
       {label}
     </Typography>
   );
+};
+
+const AccessControlUnit = ({
+  label,
+  value,
+  handleChange,
+}: {
+  label: string;
+  value: boolean;
+  handleChange: () => void;
+}) => {
+  return (
+    <Stack
+      direction="row"
+      sx={{
+        justifyContent: "space-between",
+        alignItems: "center",
+        display: "flex",
+      }}
+    >
+      <Typography
+        sx={{
+          color: "text.primary",
+          fontSize: { xs: 12, md: 14 },
+          fontWeight: 500,
+        }}
+      >
+        {label}
+      </Typography>
+      <Switch
+        checked={value}
+        onChange={handleChange}
+        slotProps={{
+          input: {
+            "aria-label": "access-control unit",
+          },
+        }}
+      />
+    </Stack>
+  );
+};
+
+const NotificationUnit = ({
+  label,
+  value,
+  handleChange,
+}: {
+  label: string;
+  value: boolean;
+  handleChange: () => void;
+}) => {
+  return (
+    <Stack
+      direction="row"
+      spacing={1}
+      sx={{
+        alignItems: "center",
+        display: "flex",
+      }}
+    >
+      <Checkbox
+        checked={value}
+        onChange={handleChange}
+        slotProps={{
+          input: {
+            "aria-label": "notification preference unit",
+          },
+        }}
+      />
+      <Typography
+        sx={{
+          color: "text.primary",
+          fontSize: { xs: 12, md: 14 },
+          fontWeight: 500,
+        }}
+      >
+        {label}
+      </Typography>
+    </Stack>
+  );
+};
+
+type AccessControlDataType = {
+  mobileAccess: boolean;
+  guestPreAuthorize: boolean;
+};
+
+type NotificationDataType = {
+  guestArrivalNotify: boolean;
+  emergencyAlerts: boolean;
 };
 
 export const EditHouseholdDetails = ({
@@ -121,6 +221,13 @@ export const EditHouseholdDetails = ({
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const { insertEditHouseholdData } = householdActions;
   const [openDelete, setOpenDelete] = useState(false);
+  const [openSuccessNotification, setOpenSuccessNotification] = useState(false);
+  const [accessControl, setAccessControl] =
+    useState<AccessControlDataType | null>(null);
+  const [notificationPref, setNotificationPref] =
+    useState<NotificationDataType | null>(null);
+  const [successData, setSuccessData] =
+    useState<ChangePrincipalSuccessNotificationData | null>(null);
 
   //Get estate id, house code and block/street details
   const estateId =
@@ -132,6 +239,7 @@ export const EditHouseholdDetails = ({
     householdId,
     principalResidentId,
   } = useSelector((state: RootState) => state.household);
+  const { closeEditView } = householdActions;
 
   // Initialize the swap resident custom hook
   const mutation = useSwapPrincipalResident(estateId, householdId);
@@ -211,18 +319,54 @@ export const EditHouseholdDetails = ({
     });
   };
 
+  const swapPrincipalData = mutation.data;
+
   useEffect(() => {
     if (!mutation.isSuccess) return;
 
     dispatch(
       insertEditHouseholdData({
-        ...mutation.data?.newPrincipal,
-        principalResidentId: mutation.data?.newPrincipal.id,
+        ...swapPrincipalData?.data?.principal,
+        principalResidentId: swapPrincipalData?.data?.principal.id,
       }),
     );
+    // Close the Change Principal Resident window
     setOpenDialog(false);
     mutation.reset();
-  }, [setOpenDialog, mutation, dispatch, insertEditHouseholdData]);
+
+    // Set data for success notification
+    setSuccessData({
+      message: swapPrincipalData?.message ?? "",
+      unitDetails: [
+        swapPrincipalData?.data?.household.unitNumber,
+        swapPrincipalData?.data?.household.blockOrStreet,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      principalFullName: swapPrincipalData?.data?.principal.fullName ?? "",
+      totalResidents: String(swapPrincipalData?.data?.totalResidents ?? 0),
+    });
+
+    // Open the success notification
+    setOpenSuccessNotification(true);
+  }, [
+    setOpenDialog,
+    mutation,
+    dispatch,
+    insertEditHouseholdData,
+    swapPrincipalData,
+  ]);
+
+  // Close the success notification handler
+  const handleCloseSuccessNotification = () => {
+    setOpenSuccessNotification(false);
+  };
+
+  // Handler for success notification back button
+  const successBackFn = () => {
+    handleCloseSuccessNotification();
+    dispatch(closeEditView());
+  };
 
   return (
     <>
@@ -823,7 +967,61 @@ export const EditHouseholdDetails = ({
         )}
         {activeTab === 2 && (
           <Box>
-            <Typography>Work in progress</Typography>
+            <Box
+              sx={{
+                mb: 2,
+              }}
+            >
+              <TabSubTitle label="Access Control" />
+              <AccessControlUnit
+                label="Enable Mobile App Access"
+                value={accessControl?.mobileAccess ?? false}
+                handleChange={() =>
+                  setAccessControl((prev) => ({
+                    mobileAccess: !accessControl?.mobileAccess,
+                    guestPreAuthorize: prev?.guestPreAuthorize ?? false,
+                  }))
+                }
+              />
+              <AccessControlUnit
+                label="Allow Guest Pre-authorization"
+                value={accessControl?.guestPreAuthorize ?? false}
+                handleChange={() =>
+                  setAccessControl((prev) => ({
+                    mobileAccess: prev?.mobileAccess ?? false,
+                    guestPreAuthorize: !accessControl?.guestPreAuthorize,
+                  }))
+                }
+              />
+            </Box>
+
+            <Box
+              sx={{
+                mb: 2,
+              }}
+            >
+              <TabSubTitle label="Notification Preferences" />
+              <NotificationUnit
+                label="Notify on Guest Arrival"
+                value={notificationPref?.guestArrivalNotify ?? false}
+                handleChange={() =>
+                  setNotificationPref((prev) => ({
+                    guestArrivalNotify: !notificationPref?.guestArrivalNotify,
+                    emergencyAlerts: prev?.emergencyAlerts ?? false,
+                  }))
+                }
+              />
+              <NotificationUnit
+                label="Emergency Alerts"
+                value={notificationPref?.emergencyAlerts ?? false}
+                handleChange={() =>
+                  setNotificationPref((prev) => ({
+                    guestArrivalNotify: prev?.guestArrivalNotify ?? false,
+                    emergencyAlerts: !notificationPref?.emergencyAlerts,
+                  }))
+                }
+              />
+            </Box>
           </Box>
         )}
       </Box>
@@ -871,7 +1069,7 @@ export const EditHouseholdDetails = ({
         </Stack>
       </Box>
 
-      {/* Search modal */}
+      {/* Change Principal Resident modal */}
       {isMobile ? (
         <Dialog
           open={openDialog}
@@ -1030,6 +1228,20 @@ export const EditHouseholdDetails = ({
 
       {/* Delete Household Dialog Box */}
       <DeleteHouseholdRecord open={openDelete} setOpen={setOpenDelete} />
+
+      {/* Successful Updated Household Notification */}
+      {successData && (
+        <EditHouseholdSuccess
+          open={openSuccessNotification}
+          setOpen={handleCloseSuccessNotification}
+          subTitle={successData.message}
+          backButtonName="Back to Households"
+          backFunction={successBackFn}
+          unitDetails={successData.unitDetails}
+          principalFullName={successData.principalFullName}
+          totalResidents={successData.totalResidents}
+        />
+      )}
     </>
   );
 };

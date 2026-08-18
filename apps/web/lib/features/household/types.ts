@@ -36,6 +36,7 @@ export type CreateHouseholdInputType = {
 export type HouseholdSliceType = {
   householdId: string;
   principalResidentId: string;
+  principalPersonId: string;
   unitNumber: string;
   blockOrStreet: string;
   photoUrl: string;
@@ -46,4 +47,5 @@ export type HouseholdSliceType = {
   email: string;
   houseCode: string;
   openEdit: boolean;
+  totalMembers: number;
 };

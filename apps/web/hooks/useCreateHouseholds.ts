@@ -1,16 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CreateHouseholdServerResponse } from "@shared/services/household";
+import {
+  CreateHouseholdData,
+  CreateHouseholdServerResponse,
+} from "@shared/services/household";
 import { CreateHouseholdPayload } from "../components/layout/dashboard/content/households/types";
 
 export const useCreateHouseholds = (estateId: string) => {
   const queryClient = useQueryClient();
   const safeEstateId = estateId.trim();
 
-  return useMutation<
-    CreateHouseholdServerResponse["data"],
-    Error,
-    CreateHouseholdPayload
-  >({
+  return useMutation<CreateHouseholdData, Error, CreateHouseholdPayload>({
     mutationKey: ["households", "create", safeEstateId],
 
     mutationFn: async (householdData) => {
@@ -47,9 +46,8 @@ export const useCreateHouseholds = (estateId: string) => {
 
       return result.data;
     },
-
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
         queryKey: ["households", safeEstateId],
       });
     },

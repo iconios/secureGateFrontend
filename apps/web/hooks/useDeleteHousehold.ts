@@ -13,13 +13,11 @@ export const useDeleteHousehold = (estateId: string, householdId: string) => {
       }
 
       if (!householdId) {
-        throw new Error(
-          "Please select a household before deleting household.",
-        );
+        throw new Error("Please select a household before deleting household.");
       }
 
       const params = new URLSearchParams();
-      params.set("estateId",estateId);
+      params.set("estateId", estateId);
       params.set("householdId", householdId);
       const queryString = params.toString();
 
