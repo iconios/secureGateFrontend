@@ -11,10 +11,12 @@ import { Paper, Box, Typography, Stack } from "@mui/material";
 import { SecureGateButton } from "./householdButton";
 import { useState } from "react";
 import { AddHouseholdWizardDialog } from "./addHouseholdWizard";
+import { ImportHouseholdsWizard } from "./importHouseholdsWizard";
 
 export const EmptyHouseholdTable = () => {
   // Local state variables to manage dialog box
   const [open, setOpen] = useState(false);
+  const [openImport, setOpenImport] = useState(false);
   const handleDialog = (v: boolean) => {
     setOpen(v);
   };
@@ -118,6 +120,7 @@ export const EmptyHouseholdTable = () => {
             icon={<ImportContacts />}
             iconPosition="start"
             appearance="secondary"
+            onClick={() => setOpenImport(true)}
           />
         </Stack>
 
@@ -170,9 +173,16 @@ export const EmptyHouseholdTable = () => {
         </Stack>
       </Paper>
 
+      {/* Add Household Wizard Dialog */}
       <AddHouseholdWizardDialog
         open={open}
         onClose={() => handleDialog(false)}
+      />
+
+      {/* Import Households Dialog */}
+      <ImportHouseholdsWizard
+        open={openImport}
+        onClose={() => setOpenImport(false)}
       />
     </>
   );

@@ -52,4 +52,5 @@ export type HouseholdSliceType = {
   guestArrivalNotify: boolean;
   emergencyAlerts: boolean;
   totalMembers: number;
+  totalResidents: number;
 };

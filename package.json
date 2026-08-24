@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "@mui/x-date-pickers": "^9.8.0",
-    "dayjs": "^1.11.21"
+    "dayjs": "^1.11.21",
+    "xlsx": "^0.18.5"
   }
 }

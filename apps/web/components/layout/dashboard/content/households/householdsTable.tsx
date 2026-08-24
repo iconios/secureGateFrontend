@@ -36,6 +36,7 @@ export const HouseholdsTable = ({
   isFetching: boolean;
 }) => {
   const data = householdsTableData?.households ?? [];
+  console.log("household data", data);
   const dispatch = useDispatch();
   const {
     insertEditHouseholdData,
@@ -88,10 +89,7 @@ export const HouseholdsTable = ({
       {/* Table of households */}
       <Stack direction="row" spacing={2}>
         <TableContainer component={Paper}>
-          <Table
-            sx={{ minWidth: 650 }}
-            aria-label="Households"
-          >
+          <Table sx={{ minWidth: 650 }} aria-label="Households">
             <TableHead>
               <TableRow>
                 {[
@@ -137,12 +135,13 @@ export const HouseholdsTable = ({
                         gender: row.principalResident.gender,
                         dateOfBirth: row.principalResident.dateOfBirth,
                         phone: row.principalResident.phone,
-                        email: row.principalResident.email,
+                        email: row.principalResident.email ?? "",
                         houseCode: row.code,
                         mobileAccess: row.mobileAccess ?? false,
                         guestPreAuthorize: row.guestPreAuthorize ?? false,
                         guestArrivalNotify: row.guestArrivalNotify ?? false,
                         emergencyAlerts: row.emergencyAlerts ?? false,
+                        totalResidents: row.residentsTotal ?? 0,
                       });
                     }}
                   >

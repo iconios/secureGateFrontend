@@ -14,6 +14,7 @@ import { SecureGateMetricCard } from "./householdMetricCard";
 import { AddHouseholdWizardDialog } from "./addHouseholdWizard";
 import { useState } from "react";
 import { HouseholdHeaderSkeleton } from "./skeletonHouseholdHeader";
+import { ImportHouseholdsWizard } from "./importHouseholdsWizard";
 
 export const HouseholdsHeader = ({
   estateName,
@@ -30,6 +31,8 @@ export const HouseholdsHeader = ({
 }) => {
   // Local state variables to manage dialog box
   const [open, setOpen] = useState(false);
+  const [openImport, setOpenImport] = useState(false);
+
   const handleDialog = (v: boolean) => {
     setOpen(v);
   };
@@ -109,6 +112,10 @@ export const HouseholdsHeader = ({
                   iconPosition="start"
                   mobileFullWidth
                   appearance="secondary"
+                  onClick={() => {
+                    console.log("Opening import wizard");
+                    setOpenImport(true);
+                  }}
                 />
                 <SecureGateButton
                   label="Add Household"
@@ -140,7 +147,7 @@ export const HouseholdsHeader = ({
 
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <SecureGateMetricCard
-                label="Total Members"
+                label="Total Residents"
                 value={totalMembers ?? 0}
                 icon={<People />}
               />
@@ -164,9 +171,17 @@ export const HouseholdsHeader = ({
           </Grid>
         </Box>
       )}
+
+      {/* Add Household Wizard Dialog */}
       <AddHouseholdWizardDialog
         open={open}
         onClose={() => handleDialog(false)}
+      />
+
+      {/* Import Households */}
+      <ImportHouseholdsWizard
+        open={openImport}
+        onClose={() => setOpenImport(false)}
       />
     </>
   );

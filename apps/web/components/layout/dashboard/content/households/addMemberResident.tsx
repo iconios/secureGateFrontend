@@ -44,9 +44,9 @@ import { SyntheticEvent, useEffect, useState } from "react";
 import {
   CreateHouseholdFormInput,
   CreateHouseholdPayload,
-  ResidentFormInput,
-  ResidentPayload,
-  ResidentSchema,
+  MemberResidentFormInput,
+  MemberResidentPayload,
+  MemberResidentSchema,
 } from "./types";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../lib/store";
@@ -113,9 +113,13 @@ export const AddMemberResident = ({
       name: "households.0.members",
     }) ?? [];
 
-  const memberForm = useForm<ResidentFormInput, unknown, ResidentPayload>({
+  const memberForm = useForm<
+    MemberResidentFormInput,
+    unknown,
+    MemberResidentPayload
+  >({
     mode: "onBlur",
-    resolver: zodResolver(ResidentSchema),
+    resolver: zodResolver(MemberResidentSchema),
     defaultValues: {
       mode: "create",
       fullName: "",
@@ -187,14 +191,14 @@ export const AddMemberResident = ({
       resetMemberForm({
         mode: "create",
         fullName: member.fullName,
-        email: member.email,
-        phone: member.phone,
+        email: member.email ?? "",
+        phone: member.phone ?? "",
         gender: member.gender,
-        photoUrl: member.photoUrl,
-        dateOfBirth: member.dateOfBirth,
+        photoUrl: member.photoUrl ?? "",
+        dateOfBirth: member.dateOfBirth ?? "",
       });
 
-      setPhotoPreviewUrl(member.photoUrl);
+      setPhotoPreviewUrl(member.photoUrl ?? null);
       return;
     }
 
@@ -207,7 +211,7 @@ export const AddMemberResident = ({
   };
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const saveMember = (member: ResidentPayload) => {
+  const saveMember = (member: MemberResidentPayload) => {
     if (editingIndex === null) {
       append(member);
     } else {
@@ -239,9 +243,7 @@ export const AddMemberResident = ({
   }, [estateId, memberMode, setShouldFetchExistingResidents]);
 
   // Get user id
-  const user = useSelector(
-    (state: RootState) => (state as RootState).auth.user,
-  );
+  const user = useSelector((state: RootState) => state.auth.user);
   const userId = user && "id" in user ? user.id : "";
   // useImageUpload hook for handling image uploads and validations
   const {

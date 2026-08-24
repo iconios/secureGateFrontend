@@ -43,6 +43,7 @@ import { useSwapPrincipalResident } from "../../../../../hooks/useSwapPrincipalR
 import { householdActions } from "../../../../../lib/features/household/householdSlice";
 import { DeleteHouseholdRecord } from "./deleteHousehold";
 import { EditHouseholdSuccess } from "./editHouseholdSuccess";
+import { DeleteHouseholdSuccess } from "./deleteHouseholdSuccess";
 
 type BooleanChangeHandler = (
   event: ChangeEvent<HTMLInputElement>,
@@ -179,6 +180,7 @@ export const EditHouseholdDetails = ({
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const { insertEditHouseholdData } = householdActions;
   const [openDelete, setOpenDelete] = useState(false);
+  const [openDeleteSuccess, setOpenDeleteSuccess] = useState(false);
   const [openSuccessNotification, setOpenSuccessNotification] = useState(false);
   const [successData, setSuccessData] =
     useState<ChangePrincipalSuccessNotificationData | null>(null);
@@ -188,15 +190,21 @@ export const EditHouseholdDetails = ({
     useSelector((state: RootState) => state.estate.estateId) ?? "";
   const {
     houseCode,
+    unitNumber,
     blockOrStreet,
     photoUrl,
     householdId,
     principalResidentId,
+    totalResidents,
   } = useSelector((state: RootState) => state.household);
   const { closeEditView } = householdActions;
 
   // Initialize the swap resident custom hook
   const mutation = useSwapPrincipalResident(estateId, householdId);
+  const deletedHouseCode = houseCode;
+  const deletedUnitNumber = unitNumber;
+  const deletedBlockOrStreet = blockOrStreet;
+  const deletedTotalResidents = totalResidents;
 
   // Get user id
   const user = useSelector(
@@ -210,7 +218,7 @@ export const EditHouseholdDetails = ({
     error: uploadError,
     loading: uploadLoading,
   } = useImageUpload({ userId });
-  
+
   const { control } = useFormContext<EditPrincipalType>();
 
   const [watchedUnitNumber, watchedBlockOrStreet] = useWatch({
@@ -1191,7 +1199,11 @@ export const EditHouseholdDetails = ({
       )}
 
       {/* Delete Household Dialog Box */}
-      <DeleteHouseholdRecord open={openDelete} setOpen={setOpenDelete} />
+      <DeleteHouseholdRecord
+        open={openDelete}
+        setOpen={setOpenDelete}
+        onDeleteSuccess={() => setOpenDeleteSuccess(true)}
+      />
 
       {/* Successful Updated Household Notification */}
       {successData && (
@@ -1206,6 +1218,16 @@ export const EditHouseholdDetails = ({
           totalResidents={successData.totalResidents}
         />
       )}
+
+      {/* Successful deletion UI */}
+      <DeleteHouseholdSuccess
+        open={openDeleteSuccess}
+        onDismiss={() => {}}
+        houseCode={deletedHouseCode}
+        unitNumber={deletedUnitNumber}
+        blockOrStreet={deletedBlockOrStreet}
+        totalResidents={deletedTotalResidents}
+      />
     </>
   );
 };

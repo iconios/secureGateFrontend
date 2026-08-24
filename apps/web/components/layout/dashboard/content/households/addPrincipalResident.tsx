@@ -44,7 +44,6 @@ export const AddPrincipalResident = ({
   error,
   isSuccess,
   isLoading,
-  isFetching,
   refetch,
   setShouldFetchExistingResidents,
   shouldFetchExistingResidents,
@@ -141,7 +140,9 @@ export const AddPrincipalResident = ({
   }, [tabValue, estateId, setShouldFetchExistingResidents]);
 
   // Get user id
-  const user = useSelector((state: unknown) => (state as RootState).auth.user);
+  const user = useSelector(
+    (state: RootState) => (state as RootState).auth.user,
+  );
   const userId = user && "id" in user ? user.id : "";
   // useImageUpload hook for handling image uploads and validations
   const {

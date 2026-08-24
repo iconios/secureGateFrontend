@@ -177,7 +177,7 @@ export const MainHouseholdComponent = ({
       <HouseholdsHeader
         estateName={data.estateName}
         totalHouseholds={data.summary.householdsTotal}
-        totalMembers={data.summary.membersTotal}
+        totalMembers={data.summary.residentsTotal}
         totalAssistants={data.summary.assistantsTotal}
         isFetching={isFetching}
       />

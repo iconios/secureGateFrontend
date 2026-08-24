@@ -47,7 +47,7 @@ export const useDeleteHousehold = (estateId: string, householdId: string) => {
       return result.data;
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ["households", estateId],
       });
     },

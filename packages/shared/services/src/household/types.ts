@@ -10,7 +10,7 @@ export type FetchHouseholdsByEstateServerResponse = {
     }[];
     summary: {
       householdsTotal: number;
-      membersTotal: number;
+      residentsTotal: number;
       assistantsTotal: number;
     };
     households:
@@ -35,6 +35,7 @@ export type FetchHouseholdsByEstateServerResponse = {
           } | null;
           memberCount: number;
           assistantCount: number;
+          residentsTotal: number;
         }[]
       | [];
     pagination: {

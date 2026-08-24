@@ -123,16 +123,18 @@ export const ChangePrincipalResident = ({
                         minWidth: 0,
                       }}
                     >
-                      <Image
-                        src={resident.photoUrl}
-                        alt=""
-                        width={45}
-                        height={45}
-                        style={{
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                        }}
-                      />
+                      {resident.photoUrl && (
+                        <Image
+                          src={resident.photoUrl}
+                          alt=""
+                          width={45}
+                          height={45}
+                          style={{
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      )}
 
                       <Typography noWrap>{resident.fullName}</Typography>
                     </Box>

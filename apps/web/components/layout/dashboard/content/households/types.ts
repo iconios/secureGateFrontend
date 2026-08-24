@@ -1,5 +1,45 @@
 import { z } from "zod";
 
+const optionalPhotoUrlSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => value === "" || z.url().safeParse(value).success,
+    "Enter a valid photo URL",
+  )
+  .optional()
+  .transform((value) => value || undefined);
+
+const optionalEmailSchema = z
+  .string()
+  .trim()
+  .optional()
+  .refine(
+    (value) => !value || z.email().safeParse(value).success,
+    "Enter a valid email address",
+  )
+  .transform((value) => (value ? value.toLowerCase() : undefined));
+
+const optionalTermiiPhoneSchema = z
+  .string()
+  .trim()
+  .optional()
+  .transform((value) => {
+    if (!value) return undefined;
+
+    let cleaned = value.replace(/\D/g, "");
+
+    if (cleaned.startsWith("0") && cleaned.length === 11) {
+      cleaned = `234${cleaned.slice(1)}`;
+    }
+
+    return cleaned;
+  })
+  .refine(
+    (value) => value === undefined || /^234\d{10}$/.test(value),
+    "Enter a valid Nigerian phone number",
+  );
+
 export const UnitDetailsSchema = z
   .object({
     unitNumber: z.string().trim().min(1, "Unit number is required"),
@@ -24,14 +64,15 @@ export type HouseholdsTableData = {
           id: string;
           residentId: string | null;
           fullName: string | null;
-          photoUrl: string;
+          photoUrl: string | null;
           phone: string;
-          email: string;
+          email: string | null;
           gender: "male" | "female";
           dateOfBirth: string;
         } | null;
         memberCount: number;
         assistantCount: number;
+        residentsTotal: number;
       }[]
     | null;
   pagination: {
@@ -56,22 +97,21 @@ const termiiPhoneSchema = z
   .refine((value) => /^234\d{10}$/.test(value), {
     message: "Enter a valid Nigerian phone number",
   });
-export const NewResidentSchema = z
-  .object({
-    fullName: z.string().trim().min(1).max(50),
-    gender: genderEnum,
-    photoUrl: z.string().trim().min(1),
-    dateOfBirth: z.string().optional(),
-    phone: termiiPhoneSchema,
-    email: z.email(),
-  })
-  .strict();
+// export const NewResidentSchema = z
+//   .object({
+//     fullName: z.string().trim().min(1).max(50),
+//     gender: genderEnum,
+//     photoUrl: optionalPhotoUrlSchema,
+//     dateOfBirth: z.string().optional(),
+//     phone: termiiPhoneSchema,
+//     email: z.email(),
+//   })
+//   .strict();
 
-export type NewResidentType = z.infer<typeof NewResidentSchema>;
+// export type NewResidentType = z.infer<typeof NewResidentSchema>;
 
 const emailSchema = z
   .email("Enter a valid email address")
-  .trim()
   .transform((v) => v.toLowerCase());
 
 const blockOrStreetSchema = z
@@ -89,7 +129,7 @@ export const HouseDetailsSchema = z.object({
   blockOrStreet: blockOrStreetSchema,
 });
 
-export const CreatedResidentSchema = z.object({
+export const CreatedPrincipalSchema = z.object({
   mode: z.literal("create"),
   fullName: z
     .string()
@@ -99,18 +139,41 @@ export const CreatedResidentSchema = z.object({
   email: emailSchema,
   phone: termiiPhoneSchema,
   gender: genderEnum.default("male"),
-  photoUrl: z.url(),
+  photoUrl: optionalPhotoUrlSchema,
   dateOfBirth: z
     .string()
     .min(1, "Date of birth is required")
     .refine((value) => !Number.isNaN(Date.parse(value)), {
       message: "Enter a valid date of birth",
-    }),
+    })
+    .optional(),
 });
 
-export type CreatedResidentType = z.infer<typeof CreatedResidentSchema>;
+export type CreatedPrincipalType = z.infer<typeof CreatedPrincipalSchema>;
 
-export const EditPrincipalSchema = CreatedResidentSchema.omit({
+export const CreatedMemberSchema = z.object({
+  mode: z.literal("create"),
+  fullName: z
+    .string()
+    .trim()
+    .min(2, "Full name is required")
+    .max(100, "Full name is too long"),
+  email: optionalEmailSchema,
+  phone: optionalTermiiPhoneSchema,
+  gender: genderEnum.default("male"),
+  photoUrl: optionalPhotoUrlSchema,
+  dateOfBirth: z
+    .string()
+    .min(1, "Date of birth is required")
+    .refine((value) => !Number.isNaN(Date.parse(value)), {
+      message: "Enter a valid date of birth",
+    })
+    .optional(),
+});
+
+export type CreatedMemberType = z.infer<typeof CreatedMemberSchema>;
+
+export const EditPrincipalSchema = CreatedPrincipalSchema.omit({
   mode: true,
   gender: true,
 }).extend({
@@ -140,18 +203,28 @@ export const LinkedResidentSchema = z.object({
 
 export type LinkedMemberType = z.infer<typeof LinkedResidentSchema>;
 
-export const ResidentSchema = z.discriminatedUnion("mode", [
+export const PrincipalResidentSchema = z.discriminatedUnion("mode", [
   LinkedResidentSchema,
-  CreatedResidentSchema,
+  CreatedPrincipalSchema,
 ]);
 
-export type ResidentFormInput = z.input<typeof ResidentSchema>;
-export type ResidentPayload = z.output<typeof ResidentSchema>;
+export const MemberResidentSchema = z.discriminatedUnion("mode", [
+  LinkedResidentSchema,
+  CreatedMemberSchema,
+]);
+
+export type PrincipalResidentFormInput = z.input<
+  typeof PrincipalResidentSchema
+>;
+export type PrincipalResidentPayload = z.output<typeof PrincipalResidentSchema>;
+
+export type MemberResidentFormInput = z.input<typeof MemberResidentSchema>;
+export type MemberResidentPayload = z.output<typeof MemberResidentSchema>;
 
 export const HouseholdSchema = z.object({
   house: HouseDetailsSchema,
-  principalResident: ResidentSchema,
-  members: z.array(ResidentSchema),
+  principalResident: PrincipalResidentSchema,
+  members: z.array(MemberResidentSchema),
 });
 
 export const CreateHouseholdInputSchema = z.object({
@@ -180,7 +253,7 @@ export type MainEditHouseholdProps = {
   principalResidentId: string;
   unitNumber: string;
   blockOrStreet: string;
-  photoUrl: string;
+  photoUrl: string | null;
   fullName: string;
   gender: "male" | "female";
   dateOfBirth: string;
@@ -191,6 +264,7 @@ export type MainEditHouseholdProps = {
   guestPreAuthorize: boolean;
   guestArrivalNotify: boolean;
   emergencyAlerts: boolean;
+  totalResidents: number;
 };
 
 export type UpdateHouseholdAndPrincipalApiSuccess = {
@@ -262,4 +336,51 @@ export type AddOneHouseholdErrorData = {
   onClose: () => void;
   onBack: () => void;
   onRetry: () => void;
+};
+
+export type DeleteHouseholdSuccessData = {
+  open: boolean;
+  houseCode: string;
+  unitNumber: string;
+  blockOrStreet: string;
+  totalResidents: number;
+  onDismiss: () => void;
+};
+
+export const RowSchema = z.object({
+  unitNumber: z
+    .string()
+    .trim()
+    .min(1, "Unit number cannot be empty")
+    .max(50, "Unit number cannot exceed 50 characters"),
+  blockOrStreet: blockOrStreetSchema,
+  principalFullName: z
+    .string()
+    .trim()
+    .min(2, "Full name is required")
+    .max(100, "Full name is too long"),
+  principalEmail: emailSchema,
+  principalPhone: termiiPhoneSchema,
+  principalGender: z.enum(["male", "female"], {
+    message: "Gender must be male or female",
+  }),
+});
+
+export type ValidRow = z.infer<typeof RowSchema>;
+
+export type RawHouseholdRow = {
+  "Unit Number": string;
+  "Block or Street": string;
+  "Principal Full Name": string;
+  "Principal Email": string;
+  "Principal Phone": string;
+  "Principal Gender": string;
+};
+
+export type RowResult = {
+  rowNumber: number;
+  original: RawHouseholdRow;
+  data?: ValidRow;
+  errors: Record<string, string[]>;
+  valid: boolean;
 };
